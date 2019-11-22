@@ -1,0 +1,1330 @@
+[gd_scene load_steps=67 format=2]
+
+[ext_resource path="res://Main.gd" type="Script" id=1]
+[ext_resource path="res://Bodies/sun.png" type="Texture" id=2]
+[ext_resource path="res://Sun.gd" type="Script" id=3]
+[ext_resource path="res://Camera2D.gd" type="Script" id=4]
+[ext_resource path="res://Data.gd" type="Script" id=5]
+[ext_resource path="res://CanvasLayer.gd" type="Script" id=6]
+[ext_resource path="res://Panel.gd" type="Script" id=7]
+[ext_resource path="res://Button.gd" type="Script" id=8]
+[ext_resource path="res://Pause.gd" type="Script" id=9]
+[ext_resource path="res://Planets.gd" type="Script" id=10]
+[ext_resource path="res://screen.gd" type="Script" id=11]
+[ext_resource path="res://bt_firetable.gd" type="Script" id=12]
+[ext_resource path="res://Save.gd" type="Script" id=13]
+[ext_resource path="res://Planet Menu.gd" type="Script" id=14]
+[ext_resource path="res://Close.gd" type="Script" id=15]
+[ext_resource path="res://ItemList.gd" type="Script" id=16]
+[ext_resource path="res://Faction List.gd" type="Script" id=17]
+[ext_resource path="res://Apply.gd" type="Script" id=18]
+[ext_resource path="res://Faction.gd" type="Script" id=19]
+[ext_resource path="res://Launch Menu.gd" type="Script" id=20]
+[ext_resource path="res://Ships/Box.png" type="Texture" id=21]
+[ext_resource path="res://Components/firefly.png" type="Texture" id=22]
+[ext_resource path="res://Components/mech.png" type="Texture" id=23]
+[ext_resource path="res://Components/amech.png" type="Texture" id=24]
+[ext_resource path="res://Components/mmech.png" type="Texture" id=25]
+[ext_resource path="res://Ship List.gd" type="Script" id=26]
+[ext_resource path="res://Build Menu.gd" type="Script" id=27]
+[ext_resource path="res://Ships/cruiser.png" type="Texture" id=28]
+[ext_resource path="res://Recruitment.gd" type="Script" id=29]
+[ext_resource path="res://Ship Design.gd" type="Script" id=30]
+[ext_resource path="res://PlayerList.gd" type="Script" id=31]
+[ext_resource path="res://designdata.gd" type="Script" id=32]
+[ext_resource path="res://Raven.gd" type="Script" id=33]
+[ext_resource path="res://Components/hull.png" type="Texture" id=34]
+[ext_resource path="res://Components/engine.png" type="Texture" id=35]
+[ext_resource path="res://Components/laser.png" type="Texture" id=36]
+[ext_resource path="res://Cruiser.gd" type="Script" id=37]
+[ext_resource path="res://Components/storage.png" type="Texture" id=38]
+[ext_resource path="res://Components/glaser.png" type="Texture" id=39]
+[ext_resource path="res://Ragnarok.gd" type="Script" id=40]
+[ext_resource path="res://Ships/ragnarok.png" type="Texture" id=41]
+[ext_resource path="res://Firefly.gd" type="Script" id=42]
+[ext_resource path="res://Shuttle.gd" type="Script" id=43]
+[ext_resource path="res://F45.gd" type="Script" id=44]
+[ext_resource path="res://T100.gd" type="Script" id=45]
+[ext_resource path="res://Thorn.gd" type="Script" id=46]
+[ext_resource path="res://Ships/thorn.png" type="Texture" id=47]
+[ext_resource path="res://Thyamis.gd" type="Script" id=48]
+[ext_resource path="res://Ships/thyamis.png" type="Texture" id=49]
+[ext_resource path="res://Delusion.gd" type="Script" id=50]
+[ext_resource path="res://Ships/eidolon.png" type="Texture" id=51]
+[ext_resource path="res://Battle.tscn" type="PackedScene" id=52]
+[ext_resource path="res://Node.gd" type="Script" id=53]
+[ext_resource path="res://Bodies/rad100.png" type="Texture" id=54]
+[ext_resource path="res://rad100.gd" type="Script" id=55]
+[ext_resource path="res://Bodies/rad200.png" type="Texture" id=56]
+[ext_resource path="res://rad200.gd" type="Script" id=57]
+[ext_resource path="res://Bodies/rad300.png" type="Texture" id=58]
+[ext_resource path="res://rad3.gd" type="Script" id=59]
+[ext_resource path="res://Bodies/rad400.png" type="Texture" id=60]
+[ext_resource path="res://rad4.gd" type="Script" id=61]
+[ext_resource path="res://Bodies/rad500.png" type="Texture" id=62]
+[ext_resource path="res://rad5.gd" type="Script" id=63]
+[ext_resource path="res://Bodies/rad600.png" type="Texture" id=64]
+[ext_resource path="res://rad6.gd" type="Script" id=65]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+var initialized = false
+onready var faction = gamestate.factions[gamestate.player_info.name]
+
+var ship_types = {}
+
+
+func _on_bt_AI_pressed():
+	if initialized == false:
+		initialized = true
+		calculate_ship_types()
+		print(ship_types)
+
+
+
+func calculate_ship_types():
+	for i in faction[\"configurations\"].values():
+		var combat = 0
+		var maxrange = 0
+		var weapons = 0
+		var hulls = 0
+		var storage = 0
+		
+		
+		for u in i[\"components\"]:
+			if u[0] == \"laser\" or u[0] == \"glaser\" or u[0] == \"rlaser\":
+				weapons = weapons + 1
+			elif u[0] == \"engine\":
+				maxrange = maxrange + 1
+			elif u[0] == \"hull\":
+				hulls = hulls + 1
+			elif u[0] == \"storage\":
+				storage = storage + 1
+				
+		combat = int(pow(weapons, 0.5) * pow(hulls, 0.5))
+		ship_types[i[\"name\"]] = [i[\"name\"], maxrange, storage, combat]
+	
+"
+
+[node name="Main" type="Node2D" groups=[
+"Persist",
+]]
+script = ExtResource( 1 )
+
+[node name="AI" type="Node" parent="."]
+script = SubResource( 1 )
+
+[node name="Sun" type="Sprite" parent="."]
+position = Vector2( 1000, 500 )
+texture = ExtResource( 2 )
+script = ExtResource( 3 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+editor/display_folded = true
+position = Vector2( 960, 540 )
+z_index = 3
+current = true
+script = ExtResource( 4 )
+
+[node name="draw_rect" type="ColorRect" parent="Camera2D"]
+margin_left = -960.0
+margin_top = -540.0
+margin_right = -920.0
+margin_bottom = -500.0
+color = Color( 0.176471, 0.172549, 0.172549, 1 )
+
+[node name="draw_rect2" type="ColorRect" parent="Camera2D"]
+margin_left = -960.0
+margin_top = -540.0
+margin_right = -920.0
+margin_bottom = -500.0
+
+[node name="draw_rect3" type="ColorRect" parent="Camera2D"]
+margin_left = -960.0
+margin_top = -540.0
+margin_right = -920.0
+margin_bottom = -500.0
+
+[node name="draw_rect4" type="ColorRect" parent="Camera2D"]
+margin_left = -960.0
+margin_top = -540.0
+margin_right = -920.0
+margin_bottom = -500.0
+
+[node name="Data" type="Node" parent="."]
+script = ExtResource( 5 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+editor/display_folded = true
+script = ExtResource( 6 )
+
+[node name="UI" type="Node2D" parent="CanvasLayer"]
+
+[node name="Panel" type="Panel" parent="CanvasLayer/UI"]
+margin_right = 136.0
+margin_bottom = 325.0
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Button" type="Button" parent="CanvasLayer/UI/Panel"]
+visible = false
+margin_left = 8.0
+margin_top = 36.0
+margin_right = 128.0
+margin_bottom = 56.0
+text = "Generate Planet"
+script = ExtResource( 8 )
+
+[node name="Pause" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 128.0
+margin_bottom = 100.0
+text = "Submit"
+script = ExtResource( 9 )
+
+[node name="Planets" type="Button" parent="CanvasLayer/UI/Panel"]
+visible = false
+margin_left = 8.0
+margin_top = 64.0
+margin_right = 128.0
+margin_bottom = 84.0
+text = "Planets"
+script = ExtResource( 10 )
+
+[node name="screen" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 164.0
+margin_right = 128.0
+margin_bottom = 184.0
+text = "Fullscreen"
+script = ExtResource( 11 )
+
+[node name="bt_AI" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 220.0
+margin_right = 128.0
+margin_bottom = 240.0
+text = "Compute AI"
+
+[node name="Panel" type="Panel" parent="CanvasLayer/UI/Panel/bt_AI"]
+editor/display_folded = true
+visible = false
+margin_left = 550.0
+margin_top = -153.0
+margin_right = 1347.0
+margin_bottom = 248.0
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Panel/bt_AI/Panel"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 82.0
+margin_bottom = 22.0
+text = "Component"
+
+[node name="Label2" type="Label" parent="CanvasLayer/UI/Panel/bt_AI/Panel"]
+margin_left = 108.0
+margin_top = 8.0
+margin_right = 182.0
+margin_bottom = 22.0
+text = "Fire Rate"
+
+[node name="Label3" type="Label" parent="CanvasLayer/UI/Panel/bt_AI/Panel"]
+margin_left = 208.0
+margin_top = 8.0
+margin_right = 268.0
+margin_bottom = 22.0
+text = "Accuracy"
+
+[node name="Label4" type="Label" parent="CanvasLayer/UI/Panel/bt_AI/Panel"]
+margin_left = 308.0
+margin_top = 8.0
+margin_right = 368.0
+margin_bottom = 22.0
+text = "Type"
+
+[node name="bt_firetable" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 192.0
+margin_right = 128.0
+margin_bottom = 212.0
+text = "Fire Tables"
+script = ExtResource( 12 )
+
+[node name="Panel" type="Panel" parent="CanvasLayer/UI/Panel/bt_firetable"]
+editor/display_folded = true
+visible = false
+margin_left = 550.0
+margin_top = -153.0
+margin_right = 1347.0
+margin_bottom = 248.0
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Panel/bt_firetable/Panel"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 82.0
+margin_bottom = 22.0
+text = "Component"
+
+[node name="Label2" type="Label" parent="CanvasLayer/UI/Panel/bt_firetable/Panel"]
+margin_left = 108.0
+margin_top = 8.0
+margin_right = 182.0
+margin_bottom = 22.0
+text = "Fire Rate"
+
+[node name="Label3" type="Label" parent="CanvasLayer/UI/Panel/bt_firetable/Panel"]
+margin_left = 208.0
+margin_top = 8.0
+margin_right = 268.0
+margin_bottom = 22.0
+text = "Accuracy"
+
+[node name="Label4" type="Label" parent="CanvasLayer/UI/Panel/bt_firetable/Panel"]
+margin_left = 308.0
+margin_top = 8.0
+margin_right = 368.0
+margin_bottom = 22.0
+text = "Type"
+
+[node name="gen_moon" type="Button" parent="CanvasLayer/UI/Panel"]
+visible = false
+margin_left = 8.0
+margin_top = 92.0
+margin_right = 128.0
+margin_bottom = 112.0
+text = "Generate Moon"
+
+[node name="Save" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 108.0
+margin_right = 128.0
+margin_bottom = 128.0
+text = "Save Game"
+script = ExtResource( 13 )
+
+[node name="FileDialog" type="FileDialog" parent="CanvasLayer/UI/Panel/Save"]
+margin_left = 529.0
+margin_top = 39.0
+margin_right = 927.0
+margin_bottom = 313.0
+access = 2
+current_dir = "C:/Users/Peter McGarvey/AppData/Roaming/Orbis Ultima"
+current_file = "battle"
+current_path = "C:/Users/Peter McGarvey/AppData/Roaming/Orbis Ultima/battle"
+
+[node name="FileDialog2" type="FileDialog" parent="CanvasLayer/UI/Panel/Save"]
+margin_left = 531.0
+margin_top = 38.0
+margin_right = 924.0
+margin_bottom = 308.0
+window_title = "Open a File"
+mode = 0
+access = 2
+current_dir = "C:/Users/Peter McGarvey/AppData/Roaming/Orbis Ultima"
+current_file = "battle"
+current_path = "C:/Users/Peter McGarvey/AppData/Roaming/Orbis Ultima/battle"
+
+[node name="Load" type="Button" parent="CanvasLayer/UI/Panel"]
+margin_left = 8.0
+margin_top = 136.0
+margin_right = 128.0
+margin_bottom = 156.0
+text = "Load Game"
+
+[node name="Planet Menu" type="Panel" parent="CanvasLayer/UI"]
+editor/display_folded = true
+margin_left = 144.0
+margin_right = 444.0
+margin_bottom = 200.0
+script = ExtResource( 14 )
+
+[node name="Close" type="Button" parent="CanvasLayer/UI/Planet Menu"]
+margin_left = 224.0
+margin_top = 46.0
+margin_right = 292.0
+margin_bottom = 76.0
+text = "Close"
+script = ExtResource( 15 )
+
+[node name="Planet List" type="ItemList" parent="CanvasLayer/UI/Planet Menu"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 108.0
+margin_bottom = 188.0
+script = ExtResource( 16 )
+
+[node name="Faction List" type="ItemList" parent="CanvasLayer/UI/Planet Menu"]
+margin_left = 116.0
+margin_top = 8.0
+margin_right = 216.0
+margin_bottom = 188.0
+script = ExtResource( 17 )
+
+[node name="Apply" type="Button" parent="CanvasLayer/UI/Planet Menu"]
+margin_left = 224.0
+margin_top = 8.0
+margin_right = 292.0
+margin_bottom = 38.0
+text = "Apply "
+script = ExtResource( 18 )
+
+[node name="PanelPlayerList" type="Panel" parent="CanvasLayer/UI"]
+editor/display_folded = true
+self_modulate = Color( 0, 0, 0, 0 )
+margin_left = 448.0
+margin_top = 7.0
+margin_right = 577.0
+margin_bottom = 111.0
+
+[node name="lblLocalPlayer" type="Label" parent="CanvasLayer/UI/PanelPlayerList"]
+margin_left = 8.38007
+margin_top = 23.0452
+margin_right = 48.3801
+margin_bottom = 37.0452
+text = "Local"
+
+[node name="boxList" type="VBoxContainer" parent="CanvasLayer/UI/PanelPlayerList"]
+margin_left = 5.69824
+margin_top = 40.7435
+margin_right = 89.6982
+margin_bottom = 119.744
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/PanelPlayerList"]
+margin_left = 2.09497
+margin_top = 2.79335
+margin_right = 52.095
+margin_bottom = 16.7934
+text = "Players:"
+
+[node name="Faction" type="TabContainer" parent="CanvasLayer/UI"]
+margin_left = 9.0
+margin_top = 305.0
+margin_right = 520.0
+margin_bottom = 642.0
+tab_align = 0
+script = ExtResource( 19 )
+
+[node name="Launch Menu" type="Panel" parent="CanvasLayer/UI/Faction"]
+editor/display_folded = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 20 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 147.892
+margin_top = 6.51303
+margin_right = 267.892
+margin_bottom = 20.513
+text = "Shipname"
+
+[node name="Box" type="Sprite" parent="CanvasLayer/UI/Faction/Launch Menu"]
+position = Vector2( 155.302, 270 )
+rotation = -1.5708
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 21 )
+
+[node name="Cost" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 138.905
+margin_top = 255.0
+margin_right = 169.905
+margin_bottom = 287.0
+text = "0"
+align = 1
+valign = 1
+
+[node name="Apply" type="Button" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 10.373
+margin_top = 270.0
+margin_right = 130.372
+margin_bottom = 290.0
+text = "Repair"
+
+[node name="Unload" type="Button" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 10.477
+margin_top = 240.0
+margin_right = 130.477
+margin_bottom = 260.0
+text = "Unload Mechs"
+
+[node name="Design" type="Node2D" parent="CanvasLayer/UI/Faction/Launch Menu"]
+editor/display_folded = true
+position = Vector2( 225.03, 130 )
+rotation = -1.5708
+z_index = 1
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Launch Menu/Design"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 22 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="mechsprite" type="Sprite" parent="CanvasLayer/UI/Faction/Launch Menu"]
+position = Vector2( 195.824, 264.819 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 23 )
+
+[node name="amechsprite" type="Sprite" parent="CanvasLayer/UI/Faction/Launch Menu"]
+position = Vector2( 242.87, 259.673 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 24 )
+
+[node name="mmechsprite" type="Sprite" parent="CanvasLayer/UI/Faction/Launch Menu"]
+position = Vector2( 295.062, 261.144 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 25 )
+
+[node name="mechs" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 191.57
+margin_top = 265.114
+margin_right = 231.57
+margin_bottom = 279.114
+text = "0"
+
+[node name="amechs" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 239.352
+margin_top = 274.67
+margin_right = 279.352
+margin_bottom = 288.67
+text = "0"
+
+[node name="mmechs" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 291.544
+margin_top = 270.259
+margin_right = 331.544
+margin_bottom = 284.259
+text = "0"
+
+[node name="bt_mech" type="TextureButton" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 175.106
+margin_top = 244.894
+margin_right = 215.106
+margin_bottom = 289.894
+
+[node name="bt_amech" type="TextureButton" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 223.166
+margin_top = 231.305
+margin_right = 263.166
+margin_bottom = 291.305
+
+[node name="bt_mmech" type="TextureButton" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 275.55
+margin_top = 235.775
+margin_right = 317.55
+margin_bottom = 294.775
+
+[node name="Ship List" type="ItemList" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 11.0
+margin_top = 27.0
+margin_right = 131.0
+margin_bottom = 227.0
+script = ExtResource( 26 )
+
+[node name="Name" type="Label" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 10.5558
+margin_top = 7.14825
+margin_right = 119.556
+margin_bottom = 21.1483
+text = "Nothing Selected"
+
+[node name="orbitlevel" type="CheckBox" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 388.158
+margin_top = 253.713
+margin_right = 494.158
+margin_bottom = 293.713
+focus_mode = 0
+action_mode = 0
+text = "Deep Orbit"
+
+[node name="bt_cancel" type="Button" parent="CanvasLayer/UI/Faction/Launch Menu"]
+margin_left = 371.843
+margin_top = 15.0
+margin_right = 486.843
+margin_bottom = 35.0
+text = "Cancel Missions"
+
+[node name="Build Menu" type="Panel" parent="CanvasLayer/UI/Faction"]
+editor/display_folded = true
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 27 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Name" type="LineEdit" parent="CanvasLayer/UI/Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 240.0
+margin_right = 128.0
+margin_bottom = 264.0
+text = "New Ship"
+
+[node name="designs" type="ItemList" parent="CanvasLayer/UI/Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 24.0
+margin_right = 128.0
+margin_bottom = 224.0
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 128.0
+margin_bottom = 22.0
+text = "Ship Designs:"
+
+[node name="Box" type="Sprite" parent="CanvasLayer/UI/Faction/Build Menu"]
+position = Vector2( 154.204, 250 )
+rotation = -1.5708
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 21 )
+
+[node name="Cost" type="Label" parent="CanvasLayer/UI/Faction/Build Menu"]
+margin_left = 137.974
+margin_top = 240.0
+margin_right = 168.974
+margin_bottom = 272.0
+text = "0"
+align = 1
+valign = 1
+
+[node name="Apply" type="Button" parent="CanvasLayer/UI/Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 270.0
+margin_right = 128.0
+margin_bottom = 290.0
+text = "Build"
+
+[node name="Design" type="Node2D" parent="CanvasLayer/UI/Faction/Build Menu"]
+position = Vector2( 240.282, 70.0482 )
+rotation = -1.5708
+z_index = 3
+z_as_relative = false
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Build Menu/Design"]
+scale = Vector2( 0.2, 0.2 )
+z_index = 2
+z_as_relative = false
+texture = ExtResource( 28 )
+
+[node name="Recruitment" type="Panel" parent="CanvasLayer/UI/Faction"]
+editor/display_folded = true
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 29 )
+
+[node name="mechs" type="Label" parent="CanvasLayer/UI/Faction/Recruitment"]
+editor/display_folded = true
+margin_left = 40.0
+margin_top = 120.0
+margin_right = 50.0
+margin_bottom = 151.0
+text = "5"
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Recruitment/mechs"]
+position = Vector2( 7.35095, 36.02 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 21 )
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Recruitment/mechs"]
+margin_left = 4.70201
+margin_top = 30.6025
+margin_right = 24.702
+margin_bottom = 44.6025
+text = "0"
+align = 1
+
+[node name="amechs" type="Label" parent="CanvasLayer/UI/Faction/Recruitment"]
+editor/display_folded = true
+margin_left = 132.676
+margin_top = 119.245
+margin_right = 142.676
+margin_bottom = 150.245
+text = "5"
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Recruitment/amechs"]
+position = Vector2( 5.07019, 37.3815 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 21 )
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Recruitment/amechs"]
+margin_left = 10.4438
+margin_top = 33.8147
+margin_right = 30.4437
+margin_bottom = 47.8147
+text = "0"
+
+[node name="mmechs" type="Label" parent="CanvasLayer/UI/Faction/Recruitment"]
+editor/display_folded = true
+margin_left = 231.186
+margin_top = 120.12
+margin_right = 276.186
+margin_bottom = 153.12
+text = "5"
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Recruitment/mmechs"]
+position = Vector2( 4.33508, 38.8516 )
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 21 )
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Recruitment/mmechs"]
+margin_left = 8.8808
+margin_top = 34.8608
+margin_right = 21.8808
+margin_bottom = 50.8608
+text = "0"
+
+[node name="bt_mech" type="TextureButton" parent="CanvasLayer/UI/Faction/Recruitment"]
+margin_left = 24.4106
+margin_top = 124.967
+margin_right = 139.411
+margin_bottom = 194.967
+rect_rotation = -90.0
+rect_scale = Vector2( 0.6, 0.6 )
+hint_tooltip = "Mini mech: Least effective, targets enemy mechs."
+texture_normal = ExtResource( 23 )
+
+[node name="bt_amech" type="TextureButton" parent="CanvasLayer/UI/Faction/Recruitment"]
+margin_left = 102.914
+margin_top = 119.821
+margin_right = 257.914
+margin_bottom = 229.821
+rect_rotation = -90.0
+rect_scale = Vector2( 0.6, 0.6 )
+hint_tooltip = "Assault mech: High rate of fire,, targets enemy mechs."
+texture_normal = ExtResource( 24 )
+
+[node name="bt_mmech" type="TextureButton" parent="CanvasLayer/UI/Faction/Recruitment"]
+margin_left = 197.742
+margin_top = 119.086
+margin_right = 337.742
+margin_bottom = 239.086
+rect_rotation = -90.0
+rect_scale = Vector2( 0.6, 0.6 )
+hint_tooltip = "Missile mech: Can target enemy mechs or ships."
+texture_normal = ExtResource( 25 )
+
+[node name="Ship Design" type="Panel" parent="CanvasLayer/UI/Faction"]
+editor/display_folded = true
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 30 )
+
+[node name="Mass" type="Sprite" parent="CanvasLayer/UI/Faction/Ship Design"]
+editor/display_folded = true
+position = Vector2( 267.925, 280 )
+rotation = -1.5708
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 21 )
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Ship Design/Mass"]
+margin_left = 37.6055
+margin_top = -25.7563
+margin_right = 60.6055
+margin_bottom = -1.75635
+rect_rotation = 90.0
+rect_scale = Vector2( 6, 6 )
+text = "0"
+
+[node name="component_types" type="ItemList" parent="CanvasLayer/UI/Faction/Ship Design"]
+margin_left = 320.0
+margin_top = 21.0
+margin_right = 438.0
+margin_bottom = 220.0
+max_columns = 2
+
+[node name="blueprints" type="ItemList" parent="CanvasLayer/UI/Faction/Ship Design"]
+margin_left = 8.0
+margin_top = 24.0
+margin_right = 128.0
+margin_bottom = 224.0
+
+[node name="Design" type="Node2D" parent="CanvasLayer/UI/Faction/Ship Design"]
+position = Vector2( 217.552, 110.201 )
+rotation = -1.5708
+z_index = 1
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/UI/Faction/Ship Design/Design"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 28 )
+
+[node name="create_configuration" type="Button" parent="CanvasLayer/UI/Faction/Ship Design"]
+margin_left = 157.908
+margin_top = 270.0
+margin_right = 246.908
+margin_bottom = 290.0
+text = "Save Design"
+
+[node name="name" type="LineEdit" parent="CanvasLayer/UI/Faction/Ship Design"]
+margin_left = 153.193
+margin_top = 240.0
+margin_right = 295.193
+margin_bottom = 264.0
+text = "Design Name"
+
+[node name="PlayerList" type="Panel" parent="CanvasLayer/UI"]
+margin_left = 16.0
+margin_top = 654.0
+margin_right = 249.0
+margin_bottom = 840.0
+script = ExtResource( 31 )
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="designdata" type="Node2D" parent="."]
+editor/display_folded = true
+visible = false
+position = Vector2( -100, 100 )
+script = ExtResource( 32 )
+
+[node name="Raven" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 33 )
+
+[node name="hull3" type="Sprite" parent="designdata/Raven"]
+position = Vector2( 38.501, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull2" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -45, 22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="engine" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -45, -50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine2" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -55, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine3" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -45, 50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="hull" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -45, -23.951 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -10.267, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull4" type="Sprite" parent="designdata/Raven"]
+position = Vector2( 13.86, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="laser4" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -27, -21 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 36 )
+
+[node name="laser2" type="Sprite" parent="designdata/Raven"]
+position = Vector2( -27, 21 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 36 )
+
+[node name="Cruiser" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 37 )
+
+[node name="engine3" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -30, 49.693 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -30, -50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="hull6" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -13.1354, 0.307343 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="hull3" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -38.6463, 0.614716 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull2" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 0.489258, 24.7662 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 1.71869, -26.8702 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -6, 48.279 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( -6, -48.563 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit2" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 17, -47.333 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull4" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 17, 46.719 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="laser4" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 39.6971, 44.4676 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 39 )
+
+[node name="laser2" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 38.4677, -45.0824 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="laser3" type="Sprite" parent="designdata/Cruiser"]
+position = Vector2( 2.81393, 0.0995178 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 39 )
+
+[node name="Ragnarok" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 40 )
+
+[node name="Sprite" type="Sprite" parent="designdata/Ragnarok"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 41 )
+
+[node name="engine3" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -50, 49.693 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -50, -50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="hull6" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 24.392, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="hull3" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -44, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull7" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -24, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull8" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 40.577, -22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull9" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 39.651, 22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull2" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 8.82861, 26.1561 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 7.74155, -25.4803 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -27.5662, 49.6685 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -46.863, -25 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit2" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -46.517, 25 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull4" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( -30.1532, -49.1837 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="laser4" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 41, 50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 39 )
+
+[node name="laser2" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 41, -50 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 39 )
+
+[node name="laser3" type="Sprite" parent="designdata/Ragnarok"]
+position = Vector2( 45, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 39 )
+
+[node name="Firefly" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 42 )
+
+[node name="hull4" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( 18, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull3" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( 40, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull2" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( -12, 30 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( -12, -30 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( -60, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="cockpit" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( -4, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="cockpit2" type="Sprite" parent="designdata/Firefly"]
+position = Vector2( -26, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="Shuttle" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 43 )
+
+[node name="hull4" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( 12.468, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull3" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( 40, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="engine" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( -54, 13 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine2" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( -54, -13 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="cockpit" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( -13.2208, -3.05176e-005 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="cockpit2" type="Sprite" parent="designdata/Shuttle"]
+position = Vector2( -38.237, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="F45" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 44 )
+
+[node name="hull4" type="Sprite" parent="designdata/F45"]
+position = Vector2( -12.0975, 7.20386 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull3" type="Sprite" parent="designdata/F45"]
+position = Vector2( 9.88681, 9.67923 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="engine" type="Sprite" parent="designdata/F45"]
+position = Vector2( -33.0543, 10.0239 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="engine2" type="Sprite" parent="designdata/F45"]
+position = Vector2( -6.07556, -12.8113 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="T100" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 45 )
+
+[node name="hull4" type="Sprite" parent="designdata/T100"]
+position = Vector2( 14, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull3" type="Sprite" parent="designdata/T100"]
+position = Vector2( -8, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 38 )
+
+[node name="engine" type="Sprite" parent="designdata/T100"]
+position = Vector2( -30.329, 0.05 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 35 )
+
+[node name="Thorn" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 46 )
+
+[node name="Sprite" type="Sprite" parent="designdata/Thorn"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 47 )
+
+[node name="hull4" type="Sprite" parent="designdata/Thorn"]
+position = Vector2( 26.808, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Thorn"]
+position = Vector2( -35.9161, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull6" type="Sprite" parent="designdata/Thorn"]
+position = Vector2( 11, 18 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull7" type="Sprite" parent="designdata/Thorn"]
+position = Vector2( 11, -18 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="Thyamis" type="Node2D" parent="designdata"]
+editor/display_folded = true
+visible = false
+script = ExtResource( 48 )
+
+[node name="Sprite" type="Sprite" parent="designdata/Thyamis"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 49 )
+
+[node name="hull4" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( 34.1807, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull9" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( -24, 18 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull10" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( -24, -18 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( -40.673, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull8" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( -50, -33 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull6" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( 18.1349, 18.7135 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull7" type="Sprite" parent="designdata/Thyamis"]
+position = Vector2( -50, 33 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="Delusion" type="Node2D" parent="designdata"]
+editor/display_folded = true
+script = ExtResource( 50 )
+
+[node name="Sprite" type="Sprite" parent="designdata/Delusion"]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 51 )
+
+[node name="hull4" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( 47, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull6" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( 22, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull11" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -22, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull9" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -26, 22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull10" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -26, -22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull5" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -43, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull8" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -57, -22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="hull7" type="Sprite" parent="designdata/Delusion"]
+position = Vector2( -57, 22 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 34 )
+
+[node name="Battle" parent="." instance=ExtResource( 52 )]
+z_index = 2
+
+[node name="ringgfx" type="Node" parent="."]
+script = ExtResource( 53 )
+
+[node name="rad100" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 500 )
+texture = ExtResource( 54 )
+script = ExtResource( 55 )
+
+[node name="rad200" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 498.413 )
+texture = ExtResource( 56 )
+script = ExtResource( 57 )
+
+[node name="rad3" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 498.413 )
+texture = ExtResource( 58 )
+script = ExtResource( 59 )
+
+[node name="rad4" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 498.413 )
+texture = ExtResource( 60 )
+script = ExtResource( 61 )
+
+[node name="rad5" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 498.413 )
+texture = ExtResource( 62 )
+script = ExtResource( 63 )
+
+[node name="rad6" type="Sprite" parent="ringgfx"]
+position = Vector2( 1000, 498.413 )
+texture = ExtResource( 64 )
+script = ExtResource( 65 )
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Ship Design" method="_on_Main_unselect"]
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Build Menu" method="_on_Main_unselect"]
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Recruitment" method="_on_Main_unselect"]
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Launch Menu" method="_on_Main_unselect"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/screen" to="CanvasLayer/UI/Panel/screen" method="_on_screen_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/bt_AI" to="AI" method="_on_bt_AI_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/bt_firetable" to="CanvasLayer/UI/Panel/bt_firetable" method="_on_bt_firetable_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/gen_moon" to="." method="_on_gen_moon_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/Save" to="CanvasLayer/UI/Panel/Save" method="_on_Save_pressed"]
+[connection signal="file_selected" from="CanvasLayer/UI/Panel/Save/FileDialog" to="CanvasLayer/UI/Panel/Save" method="_on_FileDialog_file_selected"]
+[connection signal="file_selected" from="CanvasLayer/UI/Panel/Save/FileDialog2" to="CanvasLayer/UI/Panel/Save" method="_on_FileDialog2_file_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/Panel/Load" to="CanvasLayer/UI/Panel/Save" method="_on_Load_pressed"]
+[connection signal="tab_selected" from="CanvasLayer/UI/Faction" to="CanvasLayer/UI/Faction" method="_on_Faction_tab_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/Apply" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_Apply_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/Unload" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_Unload_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/bt_mech" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_bt_mech_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/bt_amech" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_bt_amech_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/bt_mmech" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_bt_mmech_pressed"]
+[connection signal="item_selected" from="CanvasLayer/UI/Faction/Launch Menu/Ship List" to="CanvasLayer/UI/Faction" method="_on_Ship_List_item_selected"]
+[connection signal="multi_selected" from="CanvasLayer/UI/Faction/Launch Menu/Ship List" to="CanvasLayer/UI/Faction" method="_on_Ship_List_multi_selected"]
+[connection signal="toggled" from="CanvasLayer/UI/Faction/Launch Menu/orbitlevel" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_orbitlevel_toggled"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Launch Menu/bt_cancel" to="CanvasLayer/UI/Faction/Launch Menu" method="_on_bt_cancel_pressed"]
+[connection signal="item_selected" from="CanvasLayer/UI/Faction/Build Menu/designs" to="CanvasLayer/UI/Faction/Build Menu" method="_on_Designs_item_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Build Menu/Apply" to="CanvasLayer/UI/Faction/Build Menu" method="_on_Apply_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Recruitment/bt_mech" to="CanvasLayer/UI/Faction/Recruitment" method="_on_bt_mech_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Recruitment/bt_amech" to="CanvasLayer/UI/Faction/Recruitment" method="_on_bt_amech_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Recruitment/bt_mmech" to="CanvasLayer/UI/Faction/Recruitment" method="_on_bt_mmech_pressed"]
+[connection signal="item_selected" from="CanvasLayer/UI/Faction/Ship Design/component_types" to="CanvasLayer/UI/Faction/Ship Design" method="_on_component_types_item_selected"]
+[connection signal="item_selected" from="CanvasLayer/UI/Faction/Ship Design/blueprints" to="CanvasLayer/UI/Faction/Ship Design" method="_on_blueprints_item_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Ship Design/create_configuration" to="CanvasLayer/UI/Faction/Ship Design" method="_on_create_configuration_pressed"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

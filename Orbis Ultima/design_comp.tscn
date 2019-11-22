@@ -1,0 +1,44 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Components/none.png" type="Texture" id=1]
+[ext_resource path="res://design_comp.gd" type="Script" id=2]
+[ext_resource path="res://Components/engineblast.png" type="Texture" id=3]
+[ext_resource path="res://Shots/lasershot.png" type="Texture" id=4]
+[ext_resource path="res://Shots/glasershot.png" type="Texture" id=5]
+[ext_resource path="res://Components/booster.png" type="Texture" id=6]
+[ext_resource path="res://Components/hull.png" type="Texture" id=7]
+
+[node name="design_comp" type="TextureButton"]
+grow_horizontal = 2
+grow_vertical = 2
+rect_scale = Vector2( 0.2, 0.2 )
+rect_pivot_offset = Vector2( 62.5, 62.5 )
+texture_normal = ExtResource( 1 )
+script = ExtResource( 2 )
+
+[node name="blast" type="Sprite" parent="."]
+visible = false
+position = Vector2( 18, 64 )
+texture = ExtResource( 3 )
+
+[node name="ylaser" type="Sprite" parent="."]
+visible = false
+position = Vector2( 62.5, 62.5 )
+texture = ExtResource( 4 )
+offset = Vector2( 35, 0 )
+
+[node name="glaser" type="Sprite" parent="."]
+visible = false
+position = Vector2( 130.023, 64.096 )
+texture = ExtResource( 5 )
+
+[node name="booster" type="Sprite" parent="."]
+visible = false
+position = Vector2( 60, 64 )
+z_as_relative = false
+texture = ExtResource( 6 )
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 62.5, 62.5 )
+texture = ExtResource( 7 )
+[connection signal="pressed" from="." to="." method="_on_design_comp_pressed"]

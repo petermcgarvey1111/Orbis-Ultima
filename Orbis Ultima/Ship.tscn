@@ -1,0 +1,105 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Ship.gd" type="Script" id=1]
+[ext_resource path="res://Clickable.gd" type="Script" id=2]
+[ext_resource path="res://navigation.gd" type="Script" id=3]
+[ext_resource path="res://detection.gd" type="Script" id=4]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node2D
+var shipname = \"none\"
+var missionvisible = false
+onready var camera = get_node(\"../../../Camera2D\")
+onready var ship = get_parent()
+
+
+
+func _process(delta):
+	rotation = 0 - ship.rotation
+	scale = Vector2(camera._current_zoom_level, camera._current_zoom_level)
+	var mission = get_parent().mission
+	
+	if missionvisible == true:
+		get_node(\"Label\").text = str(get_parent().mission)
+		get_node(\"../target_angle\").show()
+		get_node(\"../target_angle\").rect_rotation = get_node(\"../navigation\").target_angle * 180/PI - get_parent().rotation * 180/PI
+	
+	
+			
+	else:
+		get_node(\"Label\").text = shipname
+		get_node(\"../target_angle\").hide()"
+
+[sub_resource type="CircleShape2D" id=2]
+radius = 55.0
+
+[sub_resource type="CircleShape2D" id=3]
+
+[sub_resource type="CircleShape2D" id=4]
+radius = 55.0
+
+[node name="Ship" type="KinematicBody2D"]
+z_index = 1
+collision_mask = 0
+script = ExtResource( 1 )
+
+[node name="Label" type="Node2D" parent="."]
+editor/display_folded = true
+z_index = 1
+script = SubResource( 1 )
+
+[node name="Label" type="Label" parent="Label"]
+margin_top = -10.0
+margin_right = 97.0
+margin_bottom = 4.0
+text = "yourname here"
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.2, 0.2 )
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource( 2 )
+
+[node name="Clickable" type="Area2D" parent="."]
+scale = Vector2( 8, 8 )
+collision_layer = 8
+collision_mask = 0
+script = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Clickable"]
+shape = SubResource( 3 )
+
+[node name="navigation" type="Node2D" parent="."]
+script = ExtResource( 3 )
+
+[node name="left_ray" type="RayCast2D" parent="navigation"]
+position = Vector2( 0, -30 )
+enabled = true
+cast_to = Vector2( 1000, 0 )
+
+[node name="left_ray2" type="RayCast2D" parent="navigation"]
+enabled = true
+cast_to = Vector2( 1000, 0 )
+
+[node name="right_ray2" type="RayCast2D" parent="navigation"]
+enabled = true
+cast_to = Vector2( 1000, 0 )
+
+[node name="right_ray" type="RayCast2D" parent="navigation"]
+position = Vector2( 0, 30 )
+enabled = true
+cast_to = Vector2( 1000, 0 )
+
+[node name="detection" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 4 )
+
+[node name="target_angle" type="ColorRect" parent="."]
+margin_right = 300.0
+margin_bottom = 3.0

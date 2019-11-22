@@ -1,0 +1,113 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://shot.gd" type="Script" id=1]
+[ext_resource path="res://Shots/spark.png" type="Texture" id=2]
+[ext_resource path="res://redtrace.gd" type="Script" id=3]
+[ext_resource path="res://Shots/missile.png" type="Texture" id=4]
+[ext_resource path="res://Shots/missileblast.png" type="Texture" id=5]
+[ext_resource path="res://Shots/wspark.png" type="Texture" id=6]
+
+[sub_resource type="CircleShape2D" id=1]
+
+[sub_resource type="Gradient" id=2]
+offsets = PoolRealArray( 0.00460829, 0.608295, 0.847926 )
+colors = PoolColorArray( 0.936035, 0.75413, 0, 1, 0.372681, 0, 0, 1, 0, 0, 0, 1 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+emission_shape = 1
+emission_sphere_radius = 5.0
+flag_disable_z = true
+spread = 35.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 350.0
+initial_velocity_random = 0.5
+angular_velocity = 44.5211
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+color_ramp = SubResource( 3 )
+
+[sub_resource type="Gradient" id=5]
+offsets = PoolRealArray( 0, 0.976077 )
+colors = PoolColorArray( 1, 0, 0, 1, 0, 0, 0, 1 )
+
+[sub_resource type="GradientTexture" id=6]
+gradient = SubResource( 5 )
+
+[sub_resource type="ParticlesMaterial" id=7]
+flag_disable_z = true
+spread = 1.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 600.0
+angular_velocity = 9.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+scale = 0.6
+color_ramp = SubResource( 6 )
+
+[sub_resource type="Gradient" id=8]
+offsets = PoolRealArray( 0, 0.0122951, 1 )
+colors = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1 )
+
+[sub_resource type="GradientTexture" id=9]
+gradient = SubResource( 8 )
+
+[sub_resource type="ParticlesMaterial" id=10]
+flag_disable_z = true
+gravity = Vector3( 0, 0, 0 )
+angular_velocity = 0.000169926
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+color_ramp = SubResource( 9 )
+
+[node name="shot" type="Area2D"]
+z_index = 2
+collision_layer = 0
+collision_mask = 6
+script = ExtResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="sparks" type="Particles2D" parent="."]
+scale = Vector2( 0.2, 0.2 )
+emitting = false
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource( 4 )
+texture = ExtResource( 2 )
+
+[node name="redtrace" type="Particles2D" parent="."]
+scale = Vector2( 0.4, 0.4 )
+z_index = 3
+emitting = false
+amount = 10
+local_coords = false
+process_material = SubResource( 7 )
+texture = ExtResource( 2 )
+script = ExtResource( 3 )
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 4 )
+
+[node name="blast" type="Sprite" parent="."]
+visible = false
+position = Vector2( -5.25, 0 )
+scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 5 )
+offset = Vector2( 0, 5 )
+
+[node name="trail" type="Particles2D" parent="."]
+scale = Vector2( 0.2, 0.2 )
+emitting = false
+amount = 15
+local_coords = false
+process_material = SubResource( 10 )
+texture = ExtResource( 6 )
+
+[node name="Sound" type="AudioStreamPlayer2D" parent="."]
+volume_db = -2.0
+[connection signal="area_entered" from="." to="." method="_on_shot_area_entered"]

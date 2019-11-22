@@ -1,0 +1,295 @@
+[gd_scene load_steps=20 format=2]
+
+[ext_resource path="res://Battle.gd" type="Script" id=1]
+[ext_resource path="res://Bodies/battlefield.png" type="Texture" id=2]
+[ext_resource path="res://Ships/Box.png" type="Texture" id=3]
+[ext_resource path="res://Bodies/black.png" type="Texture" id=4]
+[ext_resource path="res://background.gd" type="Script" id=5]
+[ext_resource path="res://Bodies/fleet.png" type="Texture" id=6]
+[ext_resource path="res://map_click.gd" type="Script" id=7]
+[ext_resource path="res://Bodies/TurnGauge.png" type="Texture" id=8]
+[ext_resource path="res://Bodies/HalfGauge.png" type="Texture" id=9]
+[ext_resource path="res://Bodies/Dial.png" type="Texture" id=10]
+[ext_resource path="res://Bodies/bracket.png" type="Texture" id=11]
+[ext_resource path="res://Power.gd" type="Script" id=12]
+[ext_resource path="res://Speed.gd" type="Script" id=13]
+[ext_resource path="res://Turn.gd" type="Script" id=14]
+[ext_resource path="res://Paused.gd" type="Script" id=15]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 100, 100 )
+
+[sub_resource type="Theme" id=2]
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 1, 0.533333, 0.192157, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 1, 0, 0, 1 )
+border_blend = true
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.254902, 0.282353, 0.372549, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.478431, 0.458824, 0.458824, 1 )
+
+[node name="Battle" type="Node2D"]
+visible = false
+script = ExtResource( 1 )
+
+[node name="battlefield" type="Node2D" parent="."]
+
+[node name="Sprite" type="Sprite" parent="battlefield"]
+texture = ExtResource( 2 )
+
+[node name="battlefield" type="Node2D" parent="battlefield"]
+
+[node name="mass" type="Sprite" parent="battlefield"]
+rotation = -1.5708
+scale = Vector2( 0.4, 0.4 )
+texture = ExtResource( 3 )
+
+[node name="mass_label" type="Label" parent="battlefield"]
+margin_left = -23.0
+margin_top = -27.0
+margin_right = 26.0
+margin_bottom = 46.0
+text = "0
+"
+align = 1
+valign = 1
+
+[node name="background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="background" type="Node2D" parent="background"]
+visible = false
+position = Vector2( -100000, -100000 )
+
+[node name="background" type="TextureRect" parent="background/background"]
+margin_left = -100000.0
+margin_top = -100000.0
+margin_right = 100000.0
+margin_bottom = 100000.0
+grow_horizontal = 2
+grow_vertical = 2
+rect_pivot_offset = Vector2( 100000, 100000 )
+mouse_filter = 2
+texture = ExtResource( 4 )
+expand = true
+stretch_mode = 2
+script = ExtResource( 5 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="scene" type="Panel" parent="CanvasLayer"]
+visible = false
+margin_right = 173.0
+margin_bottom = 563.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/scene"]
+margin_left = 186.797
+margin_top = 14.5173
+margin_right = 374.797
+margin_bottom = 63.5173
+rect_scale = Vector2( 3, 3 )
+text = "Sector"
+
+[node name="Tow" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 140.0
+margin_bottom = 60.0
+text = "Tow"
+
+[node name="Unload" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 80.0
+margin_right = 140.0
+margin_bottom = 120.0
+text = "Unload"
+
+[node name="Load" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 140.0
+margin_right = 140.0
+margin_bottom = 180.0
+text = "Load Resources"
+
+[node name="End" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 200.0
+margin_right = 140.0
+margin_bottom = 240.0
+text = "End Battle"
+
+[node name="Enter" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 260.0
+margin_right = 140.0
+margin_bottom = 300.0
+text = "Combat"
+
+[node name="Retreat" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 320.0
+margin_right = 140.0
+margin_bottom = 360.0
+text = "Retreat"
+
+[node name="Stand" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 500.0
+margin_right = 140.0
+margin_bottom = 540.0
+text = "Stand"
+
+[node name="Orders" type="Button" parent="CanvasLayer/scene"]
+margin_left = 20.0
+margin_top = 440.0
+margin_right = 140.0
+margin_bottom = 480.0
+text = "Show Orders"
+
+[node name="Assume_Command" type="Button" parent="CanvasLayer/scene"]
+visible = false
+margin_left = 20.0
+margin_top = 380.0
+margin_right = 140.0
+margin_bottom = 420.0
+text = "Assume Control"
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/scene"]
+margin_left = 13.2632
+margin_top = 615.789
+margin_right = 215.263
+margin_bottom = 817.789
+
+[node name="map" type="ColorRect" parent="CanvasLayer/scene"]
+margin_left = 14.2632
+margin_top = 616.789
+margin_right = 214.263
+margin_bottom = 816.789
+color = Color( 0, 0, 0, 1 )
+
+[node name="Node2D" type="Node2D" parent="CanvasLayer/scene"]
+position = Vector2( 114.263, 716.789 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="window" type="ColorRect" parent="CanvasLayer/scene/Node2D"]
+modulate = Color( 1, 1, 1, 0.219608 )
+margin_right = 40.0
+margin_bottom = 40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/scene/Node2D"]
+texture = ExtResource( 6 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="map_click" type="Area2D" parent="CanvasLayer/scene/Node2D"]
+z_index = 1
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CanvasLayer/scene/Node2D/map_click"]
+shape = SubResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Ship Info" type="Node2D" parent="CanvasLayer/scene"]
+position = Vector2( 36.3779, 802.124 )
+
+[node name="TurnGauge" type="Node2D" parent="CanvasLayer/scene/Ship Info"]
+position = Vector2( 75.8102, 129.058 )
+
+[node name="Sprite" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+texture = ExtResource( 8 )
+
+[node name="LeftGauge" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+rotation = 1.5708
+texture = ExtResource( 9 )
+
+[node name="CenterGauge1" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+rotation = -1.5708
+texture = ExtResource( 9 )
+
+[node name="CenterGauge2" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+texture = ExtResource( 9 )
+
+[node name="RightGauge" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+rotation = 3.14159
+texture = ExtResource( 9 )
+
+[node name="Dial" type="Sprite" parent="CanvasLayer/scene/Ship Info/TurnGauge"]
+texture = ExtResource( 10 )
+
+[node name="Thrust" type="Node2D" parent="CanvasLayer/scene/Ship Info"]
+
+[node name="Thrust" type="ProgressBar" parent="CanvasLayer/scene/Ship Info/Thrust"]
+margin_left = -21.7882
+margin_top = 191.624
+margin_right = 178.212
+margin_bottom = 231.624
+theme = SubResource( 2 )
+custom_styles/fg = SubResource( 3 )
+custom_styles/bg = SubResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+max_value = 2000.0
+percent_visible = false
+
+[node name="EngineBracket" type="Sprite" parent="CanvasLayer/scene/Ship Info/Thrust/Thrust"]
+position = Vector2( 16.525, 19.9549 )
+texture = ExtResource( 11 )
+
+[node name="Power" type="Label" parent="CanvasLayer/scene/Ship Info"]
+margin_left = -19.0544
+margin_top = 250.253
+margin_right = 29.9457
+margin_bottom = 264.253
+text = "Speed"
+script = ExtResource( 12 )
+
+[node name="Speed" type="Label" parent="CanvasLayer/scene/Ship Info"]
+margin_left = 54.1622
+margin_top = 205.254
+margin_right = 94.1622
+margin_bottom = 219.254
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Speed"
+script = ExtResource( 13 )
+
+[node name="Turn" type="Label" parent="CanvasLayer/scene/Ship Info"]
+margin_left = 56.6037
+margin_top = 165.815
+margin_right = 96.6037
+margin_bottom = 179.815
+text = "Speed"
+script = ExtResource( 14 )
+
+[node name="Paused" type="Node2D" parent="CanvasLayer"]
+position = Vector2( 960, 50 )
+script = ExtResource( 15 )
+[connection signal="pressed" from="CanvasLayer/scene/Tow" to="." method="_on_Tow_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Unload" to="." method="_on_Unload_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Load" to="." method="_on_Load_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/End" to="." method="_on_End_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Enter" to="." method="_on_Enter_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Retreat" to="." method="_on_Retreat_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Stand" to="." method="_on_Stand_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Orders" to="." method="_on_Orders_pressed"]
+[connection signal="pressed" from="CanvasLayer/scene/Assume_Command" to="." method="_on_Assume_Command_pressed"]

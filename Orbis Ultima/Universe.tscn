@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Sun.gd" type="Script" id=1]
+[ext_resource path="res://Bodies/sun.png" type="Texture" id=2]
+[ext_resource path="res://Camera2D.gd" type="Script" id=3]
+[ext_resource path="res://moon.gd" type="Script" id=4]
+
+[node name="Universe" type="Node2D"]
+
+[node name="Sun" type="Node2D" parent="."]
+position = Vector2( 500, 500 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Sprite" type="Sprite" parent="Sun"]
+position = Vector2( 3.4248, -3.05176e-005 )
+texture = ExtResource( 2 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource( 3 )
+
+[node name="planet" type="Node2D" parent="."]
+position = Vector2( 956.386, 510.797 )
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Sprite" type="Sprite" parent="planet"]
+position = Vector2( -3.15967, -6.12958 )
+texture = ExtResource( 2 )

@@ -1,0 +1,213 @@
+[gd_scene load_steps=16 format=2]
+
+[ext_resource path="res://Panel.gd" type="Script" id=1]
+[ext_resource path="res://Button.gd" type="Script" id=2]
+[ext_resource path="res://Pause.gd" type="Script" id=3]
+[ext_resource path="res://Planets.gd" type="Script" id=4]
+[ext_resource path="res://Planet Menu.gd" type="Script" id=5]
+[ext_resource path="res://Close.gd" type="Script" id=6]
+[ext_resource path="res://ItemList.gd" type="Script" id=7]
+[ext_resource path="res://Faction List.gd" type="Script" id=8]
+[ext_resource path="res://Apply.gd" type="Script" id=9]
+[ext_resource path="res://Faction.gd" type="Script" id=10]
+[ext_resource path="res://Ship List.gd" type="Script" id=11]
+[ext_resource path="res://Build Menu.gd" type="Script" id=12]
+[ext_resource path="res://Ships/falcon.png" type="Texture" id=13]
+[ext_resource path="res://Ships/Box.png" type="Texture" id=14]
+[ext_resource path="res://PlayerList.gd" type="Script" id=15]
+
+[node name="UI" type="Node2D"]
+
+[node name="Panel" type="Panel" parent="."]
+editor/display_folded = true
+margin_right = 136.0
+margin_bottom = 325.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Button" type="Button" parent="Panel"]
+margin_left = 8.0
+margin_top = 36.0
+margin_right = 128.0
+margin_bottom = 56.0
+text = "Generate Planet"
+script = ExtResource( 2 )
+
+[node name="Pause" type="Button" parent="Panel"]
+margin_left = 8.44012
+margin_top = 8.0
+margin_right = 128.44
+margin_bottom = 28.0
+text = "Pause"
+script = ExtResource( 3 )
+
+[node name="Planets" type="Button" parent="Panel"]
+margin_left = 8.0
+margin_top = 64.0
+margin_right = 128.0
+margin_bottom = 84.0
+text = "Planets"
+script = ExtResource( 4 )
+
+[node name="Planet Menu" type="Panel" parent="."]
+margin_left = 144.0
+margin_right = 444.0
+margin_bottom = 200.0
+script = ExtResource( 5 )
+
+[node name="Close" type="Button" parent="Planet Menu"]
+margin_left = 224.0
+margin_top = 46.0
+margin_right = 292.0
+margin_bottom = 76.0
+text = "Close"
+script = ExtResource( 6 )
+
+[node name="Planet List" type="ItemList" parent="Planet Menu"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 108.0
+margin_bottom = 188.0
+script = ExtResource( 7 )
+
+[node name="Faction List" type="ItemList" parent="Planet Menu"]
+margin_left = 116.0
+margin_top = 8.0
+margin_right = 216.0
+margin_bottom = 188.0
+script = ExtResource( 8 )
+
+[node name="Apply" type="Button" parent="Planet Menu"]
+margin_left = 224.0
+margin_top = 8.0
+margin_right = 292.0
+margin_bottom = 38.0
+text = "Apply "
+script = ExtResource( 9 )
+
+[node name="PanelPlayerList" type="Panel" parent="."]
+editor/display_folded = true
+self_modulate = Color( 0, 0, 0, 0 )
+margin_left = 448.0
+margin_top = 7.0
+margin_right = 577.0
+margin_bottom = 111.0
+
+[node name="lblLocalPlayer" type="Label" parent="PanelPlayerList"]
+margin_left = 8.38007
+margin_top = 23.0452
+margin_right = 48.3801
+margin_bottom = 37.0452
+text = "Local"
+
+[node name="boxList" type="VBoxContainer" parent="PanelPlayerList"]
+margin_left = 5.69824
+margin_top = 40.7435
+margin_right = 89.6982
+margin_bottom = 119.744
+
+[node name="Label" type="Label" parent="PanelPlayerList"]
+margin_left = 2.09497
+margin_top = 2.79335
+margin_right = 52.095
+margin_bottom = 16.7934
+text = "Players:"
+
+[node name="Faction" type="Panel" parent="."]
+margin_top = 333.0
+margin_right = 136.0
+margin_bottom = 633.0
+script = ExtResource( 10 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Ship List" type="ItemList" parent="Faction"]
+margin_left = 8.0
+margin_top = 24.0
+margin_right = 128.0
+margin_bottom = 104.0
+script = ExtResource( 11 )
+
+[node name="Name" type="Label" parent="Faction"]
+margin_left = 14.4045
+margin_top = 6.64822
+margin_right = 123.404
+margin_bottom = 20.6482
+text = "Nothing Selected"
+
+[node name="Build" type="Button" parent="Faction"]
+margin_left = 20.3999
+margin_top = 265.35
+margin_right = 101.4
+margin_bottom = 285.35
+text = "Build"
+
+[node name="Build Menu" type="Panel" parent="Faction"]
+margin_left = 142.0
+margin_right = 442.0
+margin_bottom = 300.0
+script = ExtResource( 12 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Name" type="LineEdit" parent="Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 112.0
+margin_right = 128.0
+margin_bottom = 136.0
+text = "New Ship"
+
+[node name="designs" type="ItemList" parent="Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 24.0
+margin_right = 128.0
+margin_bottom = 104.0
+
+[node name="Design" type="Sprite" parent="Faction/Build Menu"]
+position = Vector2( 238.952, 83.1453 )
+scale = Vector2( 0.15, 0.15 )
+texture = ExtResource( 13 )
+
+[node name="Label" type="Label" parent="Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 128.0
+margin_bottom = 22.0
+text = "Blueprints:"
+
+[node name="Box" type="Sprite" parent="Faction/Build Menu"]
+position = Vector2( 164.495, 25.8403 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 14 )
+
+[node name="Cost" type="Label" parent="Faction/Build Menu"]
+margin_left = 149.0
+margin_top = 10.0
+margin_right = 180.0
+margin_bottom = 42.0
+text = "0"
+align = 1
+valign = 1
+
+[node name="Apply" type="Button" parent="Faction/Build Menu"]
+margin_left = 8.0
+margin_top = 144.0
+margin_right = 128.0
+margin_bottom = 164.0
+text = "Build"
+
+[node name="PlayerList" type="Panel" parent="."]
+margin_left = 1720.0
+margin_right = 1920.0
+margin_bottom = 120.0
+script = ExtResource( 15 )
+[connection signal="item_selected" from="Faction/Ship List" to="Faction" method="_on_Ship_List_item_selected"]
+[connection signal="multi_selected" from="Faction/Ship List" to="Faction" method="_on_Ship_List_multi_selected"]
+[connection signal="pressed" from="Faction/Build" to="Faction" method="_on_Build_pressed"]
+[connection signal="update_PlayerList" from="Faction/Build Menu" to="PlayerList" method="update_PlayerList"]
+[connection signal="item_selected" from="Faction/Build Menu/designs" to="Faction/Build Menu" method="_on_Designs_item_selected"]
+[connection signal="pressed" from="Faction/Build Menu/Apply" to="Faction/Build Menu" method="_on_Apply_pressed"]
