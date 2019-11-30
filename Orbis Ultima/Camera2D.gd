@@ -58,16 +58,16 @@ func _process(delta):
 				is_dragging = false
 				draw_area(false)
 	
-	if Input.is_key_pressed(KEY_LEFT):
+	if Input.is_key_pressed(KEY_A):
 		set_offset(get_offset() + Vector2(-10,0) * _current_zoom_level) 
 		
-	elif Input.is_key_pressed(KEY_RIGHT):
+	elif Input.is_key_pressed(KEY_D):
 		set_offset(get_offset() + Vector2(10,0) * _current_zoom_level) 
 		
-	if Input.is_key_pressed(KEY_DOWN):
+	if Input.is_key_pressed(KEY_S):
 		set_offset(get_offset() + Vector2(0,10) * _current_zoom_level ) 
 		
-	elif Input.is_key_pressed(KEY_UP):
+	elif Input.is_key_pressed(KEY_W):
 		set_offset(get_offset() + Vector2(0,-10) * _current_zoom_level )
 		
 	

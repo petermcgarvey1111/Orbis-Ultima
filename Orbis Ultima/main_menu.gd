@@ -16,6 +16,7 @@ func _on_ready_to_play():
 		gamestate.rings = int(get_node("PanelHost/rings").text)
 		gamestate.planets = int(get_node("PanelHost/planets").text)
 		gamestate.moons = int(get_node("PanelHost/moons").text)
+		gamestate.storms = int(get_node("PanelHost/storms").text)
 		gamestate.startingplayers = int(get_node("PanelHost/txtfactions").text)
 		gamestate.startingmass = int(get_node("PanelHost/resources").text)
 		gamestate.factions[gamestate.player_info.name]["mass"] = gamestate.startingmass
@@ -25,7 +26,7 @@ func _on_ready_to_play():
 func _on_btCreate_pressed():
 	# Properly set the local player information
 	set_player_info()
-	gamestate.generate_me()
+	gamestate.generate_faction(gamestate.player_info["name"], gamestate.player_info["char_color"], false)
 	
 	# Gather values from the GUI and fill the network.server_info dictionary
 	if (!$PanelHost/txtServerName.text.empty()):
@@ -39,7 +40,7 @@ func _on_btCreate_pressed():
 func _on_btJoin_pressed():
 	# Properly set the local player information
 	set_player_info()
-	gamestate.generate_me()
+	gamestate.generate_faction(gamestate.player_info["name"], gamestate.player_info["char_color"], false)
 	var port = int($PanelJoin/txtJoinPort.text)
 	var ip = $PanelJoin/txtJoinIP.text
 	network.join_server(ip, port)

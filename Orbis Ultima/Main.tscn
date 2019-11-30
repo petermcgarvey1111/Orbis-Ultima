@@ -68,43 +68,40 @@
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Node
-var initialized = false
-onready var faction = gamestate.factions[gamestate.player_info.name]
 
-var ship_types = {}
+onready var Main = get_parent()
+onready var faction_ai = preload(\"res://faction_ai.tscn\")
+
+
 
 
 func _on_bt_AI_pressed():
-	if initialized == false:
-		initialized = true
-		calculate_ship_types()
-		print(ship_types)
-
-
-
-func calculate_ship_types():
-	for i in faction[\"configurations\"].values():
-		var combat = 0
-		var maxrange = 0
-		var weapons = 0
-		var hulls = 0
-		var storage = 0
-		
-		
-		for u in i[\"components\"]:
-			if u[0] == \"laser\" or u[0] == \"glaser\" or u[0] == \"rlaser\":
-				weapons = weapons + 1
-			elif u[0] == \"engine\":
-				maxrange = maxrange + 1
-			elif u[0] == \"hull\":
-				hulls = hulls + 1
-			elif u[0] == \"storage\":
-				storage = storage + 1
+	for i in range(5):
+		if gamestate.spaces[i][\"type\"] == \"Planet\":
+			if gamestate.spaces[i][\"faction\"] == \"none\":
+				var name = \"AI\" + str(i + 1)
+				var color = Color(1 - randf()/3, 1 - randf()/3, 1 - randf()/3, 1).to_html()
+				gamestate.generate_faction(name, color, true)
 				
-		combat = int(pow(weapons, 0.5) * pow(hulls, 0.5))
-		ship_types[i[\"name\"]] = [i[\"name\"], maxrange, storage, combat]
+				init_ai(name)
+				
+				
+				gamestate.spaces[i][\"faction\"] = name
+				gamestate.spaces[i][\"name\"] = name
+				gamestate.factions[name][\"home\"] = i
+				gamestate.factions[name][\"mass\"] = gamestate.startingmass * 1.5
+				gamestate.spaces[i][\"nodeid\"].update_planet_info()
+				
+				for j in Main.get_node(\"designdata\").standard_configs:
+					gamestate.factions[name][\"configurations\"][j[\"name\"]] = j
+					
+sync func init_ai(name):
+	var new_ai = faction_ai.instance()
+	add_child(new_ai)
+	new_ai.faction = gamestate.factions[name]
+	new_ai.faction_name = name	
 	
-"
+	"
 
 [node name="Main" type="Node2D" groups=[
 "Persist",
@@ -155,7 +152,6 @@ margin_bottom = -500.0
 script = ExtResource( 5 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-editor/display_folded = true
 script = ExtResource( 6 )
 
 [node name="UI" type="Node2D" parent="CanvasLayer"]
@@ -741,17 +737,16 @@ margin_bottom = -4.0
 script = ExtResource( 30 )
 
 [node name="Mass" type="Sprite" parent="CanvasLayer/UI/Faction/Ship Design"]
-editor/display_folded = true
-position = Vector2( 267.925, 280 )
+position = Vector2( 380.739, 280.903 )
 rotation = -1.5708
 scale = Vector2( 0.2, 0.2 )
 texture = ExtResource( 21 )
 
 [node name="Label" type="Label" parent="CanvasLayer/UI/Faction/Ship Design/Mass"]
-margin_left = 37.6055
-margin_top = -25.7563
-margin_right = 60.6055
-margin_bottom = -1.75635
+margin_left = 37.6052
+margin_top = -25.7562
+margin_right = 60.6052
+margin_bottom = -1.75629
 rect_rotation = 90.0
 rect_scale = Vector2( 6, 6 )
 text = "0"
@@ -785,6 +780,13 @@ margin_right = 246.908
 margin_bottom = 290.0
 text = "Save Design"
 
+[node name="create_build" type="Button" parent="CanvasLayer/UI/Faction/Ship Design"]
+margin_left = 255.379
+margin_top = 270.0
+margin_right = 360.379
+margin_bottom = 290.0
+text = "Save and Build"
+
 [node name="name" type="LineEdit" parent="CanvasLayer/UI/Faction/Ship Design"]
 margin_left = 153.193
 margin_top = 240.0
@@ -802,8 +804,6 @@ script = ExtResource( 31 )
 [node name="Timer" type="Timer" parent="."]
 
 [node name="designdata" type="Node2D" parent="."]
-editor/display_folded = true
-visible = false
 position = Vector2( -100, 100 )
 script = ExtResource( 32 )
 
@@ -863,8 +863,6 @@ scale = Vector2( 0.2, 0.2 )
 texture = ExtResource( 36 )
 
 [node name="Cruiser" type="Node2D" parent="designdata"]
-editor/display_folded = true
-visible = false
 script = ExtResource( 37 )
 
 [node name="engine3" type="Sprite" parent="designdata/Cruiser"]
@@ -1216,6 +1214,7 @@ texture = ExtResource( 34 )
 
 [node name="Delusion" type="Node2D" parent="designdata"]
 editor/display_folded = true
+visible = false
 script = ExtResource( 50 )
 
 [node name="Sprite" type="Sprite" parent="designdata/Delusion"]
@@ -1297,10 +1296,10 @@ script = ExtResource( 63 )
 position = Vector2( 1000, 498.413 )
 texture = ExtResource( 64 )
 script = ExtResource( 65 )
-[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Ship Design" method="_on_Main_unselect"]
-[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Build Menu" method="_on_Main_unselect"]
 [connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Recruitment" method="_on_Main_unselect"]
 [connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Launch Menu" method="_on_Main_unselect"]
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Build Menu" method="_on_Main_unselect"]
+[connection signal="unselect" from="." to="CanvasLayer/UI/Faction/Ship Design" method="_on_Main_unselect"]
 [connection signal="pressed" from="CanvasLayer/UI/Panel/screen" to="CanvasLayer/UI/Panel/screen" method="_on_screen_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Panel/bt_AI" to="AI" method="_on_bt_AI_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Panel/bt_firetable" to="CanvasLayer/UI/Panel/bt_firetable" method="_on_bt_firetable_pressed"]
@@ -1327,4 +1326,5 @@ script = ExtResource( 65 )
 [connection signal="item_selected" from="CanvasLayer/UI/Faction/Ship Design/component_types" to="CanvasLayer/UI/Faction/Ship Design" method="_on_component_types_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/Faction/Ship Design/blueprints" to="CanvasLayer/UI/Faction/Ship Design" method="_on_blueprints_item_selected"]
 [connection signal="pressed" from="CanvasLayer/UI/Faction/Ship Design/create_configuration" to="CanvasLayer/UI/Faction/Ship Design" method="_on_create_configuration_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Faction/Ship Design/create_build" to="CanvasLayer/UI/Faction/Ship Design" method="_on_create_build_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

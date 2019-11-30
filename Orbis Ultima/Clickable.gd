@@ -26,6 +26,7 @@ func on_right_click():
 	if Battle.selectedships.size() > 0:
 		
 		for i in Battle.selectedships:
+			
 			if i.towing == true and i.faction == get_parent().faction:
 				Battle.assign_tow(  get_parent().shipid, i.shipid) 
 				
@@ -34,14 +35,10 @@ func on_right_click():
 				var angle = towerposition.angle_to(toweeposition)
 				
 			else:
-				#if i.faction != get_parent().faction:
-				if 1 == 1:
-					i.target = get_parent()
-					for l in i.componentnodes:
-						if l.data[0] == "glaser" or "rlaser":
-							Battle.rpc("assign_target", i.shipid, l.componentid, get_parent().shipid)
 				
-				#i.fire_missile(get_parent())	
+				if i.faction != get_parent().faction:
+					Battle.rpc("queue_assign_target", (Battle.battletimer + Battle.lag_delay), i, get_parent())
+					
 			
 		
 		

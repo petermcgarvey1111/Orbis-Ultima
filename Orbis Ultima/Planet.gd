@@ -75,4 +75,19 @@ sync func update_planet_info():
 		else:
 			get_node("C/Army").hide()
 		
+	if get_node("..").mytimer > 0:
+		var mytimer = get_node("..").mytimer
+		angle = startangle + (mytimer * arc)/60
+		if angle > 2*PI:
+			angle = angle - 2*PI
+		position = center + radius * Vector2(cos(angle), sin(angle))
+	if type == "empty" and get_node("..").paused == 0:
+		get_node("Sprite").modulate = Color(0.3,0.3,0.3,1)
+	elif type == "empty" :
+		get_node("Sprite").modulate = Color(0.6,0.6,0.6,1)
+
+	if get_parent().clickstate == "battle":
+		hide()
+	else:
+		show()
 	

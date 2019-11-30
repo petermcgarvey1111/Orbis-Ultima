@@ -9,11 +9,11 @@ var rng = 0
 var life = 22
 var speedmult = 1000
 onready var battle = get_parent()
-var missilerot = 0
 var turnrad = 1.5
 var target_projection = Vector2(0,0)
 var variance = 0
 onready var delta2 = battle.delta2
+onready var time_mod = battle.time_mod
 var lag_delay = 15
 
 func _ready():
@@ -33,9 +33,9 @@ func _ready():
 	if weapontype == "missile":
 		$Sprite.texture = load("res://Shots/missile.png")
 		$blast.show()
-		rotation = missilerot
 		$trail.set_emitting(true)
 		life = 100
+		
 	
 	else:
 		if target.type == "ship":
@@ -49,12 +49,15 @@ func _ready():
 		look_at(target.get_global_position())
 
 func _physics_process(delta):
-	delta = delta2
+	lag_delay = battle.lag_delay
+	delta = delta2 * time_mod
 	if battle.battle_paused == false:
 		life = life - delta
 		$trail.set_speed_scale(1)
-				
+		
 		if weapontype == "missile":
+			
+			speedmult = speedmult + delta * 10
 			if life > 0.5:
 				if get_angle_to(target.get_global_position()) > 0 + PI/180:
 					rotation = rotation + delta / turnrad
@@ -82,8 +85,8 @@ func _physics_process(delta):
 			
 			if life < 0 and weapontype != "bomb":
 				queue_free()
-			if weapontype == "bomb":
-				scale = scale * 0.999 * delta * 60
+#			if weapontype == "bomb":
+#				scale = scale * 0.999
 				
 	else:
 		$trail.set_speed_scale(0)	
@@ -93,8 +96,8 @@ func _on_shot_area_entered(area):
 	
 	if area.get_parent().faction != parent.faction:
 		
-		if 1 == 1: #(get_tree().is_network_server()):
-			if target.type == "ship":
+		if life > 0.6: #(get_tree().is_network_server()):
+			if target.type == "ship" and area.get_parent().type == "ship":
 				#var rng2 = battle.rg.randf() * pow(target.speed, 0.5)
 				#var rng3 = battle.rg.randf() * 40
 				if rng > pow(target.speed, 0.5) / 2:
@@ -105,7 +108,10 @@ func _on_shot_area_entered(area):
 					$trail.hide()
 					$blast.hide()
 					life = 0.5
+					if weapontype == "missile":
+						target.missiles_tracking = target.missiles_tracking - 1
 					if (get_tree().is_network_server()):
+						target = area.get_parent()
 						if weapontype == "random":
 							var rng = randf() * 100
 							if rng < accuracy and target.hulls > 0:
@@ -171,7 +177,9 @@ func _on_shot_area_entered(area):
 				
 				
 				
-					
+#				else:
+#					print(target.speed)
+#					print(weapontype)	
 			
 			
 			

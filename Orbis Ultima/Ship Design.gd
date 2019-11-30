@@ -107,5 +107,59 @@ func _on_create_configuration_pressed():
 			new_configuration["components"].append(new_component)
 			index = index + 1
 		new_configuration["cost"] = Main.get_node("designdata").calculate_ship_cost(new_configuration)
+		new_configuration["ai"] = Main.get_node("designdata").calculate_ship_class(new_configuration)
 		gamestate.factions[gamestate.player_info.name]["configurations"][new_configuration["name"]] = new_configuration
 		initialize()
+		
+
+
+func _on_create_build_pressed():
+	var hashull = false
+	for i in components:
+		if i == "hull":
+			hashull = true
+	
+	if gamestate.factions[gamestate.player_info.name]["configurations"].has($name.text) or hashull == false:
+		pass
+	else:
+		var new_configuration = {}
+		new_configuration["blueprint"] = blueprint["name"]
+		new_configuration["name"] = $name.text
+		new_configuration["components"] = []
+		var index = 1
+		for i in components:
+			var new_component = [i, 0, 0, "ready" , $Design.get_children()[index].rect_rotation]
+			new_configuration["components"].append(new_component)
+			index = index + 1
+		new_configuration["cost"] = Main.get_node("designdata").calculate_ship_cost(new_configuration)
+		new_configuration["ai"] = Main.get_node("designdata").calculate_ship_class(new_configuration)
+		gamestate.factions[gamestate.player_info.name]["configurations"][new_configuration["name"]] = new_configuration
+		
+		
+		if gamestate.factions[gamestate.player_info.name]["mass"] >= new_configuration["cost"]:
+			gamestate.factions[gamestate.player_info.name]["mass"] = gamestate.factions[gamestate.player_info.name]["mass"] - new_configuration["cost"]
+			var newship = Main.get_node("designdata").standard_ship.duplicate(true)
+			newship["name"] = new_configuration["name"]
+			newship["location"] = get_node("..").selectedplanet["spaceid"]
+			newship["launched"] = "home"
+			newship["faction"] = gamestate.player_info.name
+			newship["configuration"] = new_configuration.duplicate(true)
+			newship["blueprint"] = newship["configuration"]["blueprint"]
+			gamestate.factions[gamestate.player_info.name]["ships"].append(newship)
+			
+			for i in newship["configuration"]["components"]:
+				if i[0] == "bombs":
+					i[2] = 2
+				elif i[0] == "missile":
+					i[2] = 1	
+		
+		
+		
+		
+		
+		
+		initialize()
+	
+	
+	
+	

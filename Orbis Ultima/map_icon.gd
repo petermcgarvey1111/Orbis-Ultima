@@ -19,10 +19,13 @@ func _process(delta):
 		else:
 			get_node("../../Node2D/map_click").map_ratio = get_node("../../Node2D/map_click").map_ratio + 1
 			
-	if ship.detected_by.has(gamestate.player_info.name) and ship.hulls > 0 and ship.status != "stranded":
+	if ship.detected_by.has(gamestate.player_info.name) and ship.status == "alive":
 		show()
-	elif ship.battle.factions.has(gamestate.player_info.name) or ship.hulls < 1:
-		hide()
-	else:
+	elif ship.battle.battle_fleets.has(gamestate.player_info.name):
+		if ship.battle.battle_fleets[gamestate.player_info.name] == "alive":
+			hide()
+		elif ship.status == "alive":
+			show()
+	elif ship.status == "alive":
 		show()
-		
+

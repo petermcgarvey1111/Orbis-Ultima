@@ -21,7 +21,7 @@ onready var pursuitradius = battle.pursuitradius
 onready var deepradius = battle.deepradius
 onready var exitradius = battle.exitradius
 onready var delta2 = battle.delta2
-
+onready var time_mod = battle.time_mod
 onready var this_ship = get_parent()
 var firetable = []
 var home_angle = 0
@@ -33,17 +33,13 @@ var lag_delay = 15
 
 func _ready():
 	
-	home_angle = data[4] *PI/180
+	home_angle = data[4] * PI/180
 	$friendly_check.add_exception(this_ship.get_node("Area2D"))
 	
-	if data[0] == "missile":
-		rotation = position.y * PI / 180
-	elif data[0] == "rlaser":
-		$Sound.stream = load("res://Sounds/" + data[0] + ".wav")
-	elif data[0] == "laser" or data[0] == "glaser":
+	
+	if data[0] == "laser" or data[0] == "glaser":
 		$red_laser.queue_free()
 	else:
-		$red_laser.queue_free()
 		$friendly_check.queue_free()
 		
 	
@@ -96,27 +92,28 @@ func pick_new_target(type, mode):
 	
 
 func _physics_process(delta):
-	delta = delta2
+	lag_delay = battle.lag_delay
+	delta = delta2 * time_mod
 	#print(get_parent().position)
 	if battle.battle_paused == false:
-		if 1 == 1: #(get_tree().is_network_server()):
-			if data[3] == "ready" and firetable.size() > 0:
-					
-					if target == this_ship or this_ship.position.distance_to(target.position) > firetable[5] or target.status == "dead" or magazine < 1 or abs(this_ship.get_angle_to(target.position)) > firetable[6] *PI/180:
-						if data[0] == "laser":
-							target = pick_new_target("ship","random")
-							magazine = 10
-							battle.assign_target( this_ship.shipid, componentid, target.shipid)
-						elif data[0] == "glaser":
-							target = pick_new_target("ship","random")
-							battle.assign_target( this_ship.shipid, componentid, target.shipid)
-						elif data[0] == "rlaser":
-							target = pick_new_target("ship","random")
-							battle.assign_target( this_ship.shipid, componentid, target.shipid)
-						elif data[0] == "bombs" and this_ship.position.distance_to(battle.core) < unloadradius + 5:
-							target = pick_new_target("bombmech","random")
-							if target != this_ship:
-								battle.assign_target_ground(this_ship.shipid, componentid, target.mechid)
+		
+		if data[3] == "ready" and firetable.size() > 0:
+				
+				if target == this_ship or this_ship.position.distance_to(target.position) > firetable[5] or target.status == "dead" or magazine < 1 or abs(this_ship.get_angle_to(target.position)) > firetable[6] *PI/180:
+					if data[0] == "laser":
+						target = pick_new_target("ship","random")
+						magazine = 10
+						battle.assign_target( this_ship.shipid, componentid, target.shipid)
+					elif data[0] == "glaser":
+						target = pick_new_target("ship","random")
+						battle.assign_target( this_ship.shipid, componentid, target.shipid)
+					elif data[0] == "rlaser":
+						target = pick_new_target("ship","random")
+						battle.assign_target( this_ship.shipid, componentid, target.shipid)
+					elif data[0] == "bombs" and this_ship.position.distance_to(battle.core) < unloadradius + 5:
+						target = pick_new_target("bombmech","random")
+						if target != this_ship:
+							battle.assign_target_ground(this_ship.shipid, componentid, target.mechid)
 						
 	
 	
@@ -185,7 +182,7 @@ func _physics_process(delta):
 						$red_laser.hide()
 					
 			
-			if data[0] == "bombs" and data[2] > 0:
+			elif data[0] == "bombs" and data[2] > 0:
 				
 				reload = reload - delta
 				if target !=  this_ship:
@@ -199,10 +196,7 @@ func _physics_process(delta):
 						elif data[2] == 0:
 							$Sprite.texture = load("res://Components/0bombs.png")
 			
-#			elif data[0] == "booster" and get_parent().radius <= unloadradius:				
-#				if data[3] == "ready":
-#					if (get_tree().is_network_server()):
-#						battle.rpc("destroy_comp", get_parent().shipid, componentid)								
+			
 			
 			
 		elif data[0] == "storage" and get_parent().position.distance_to(Vector2(0,0)) <= unloadradius:	

@@ -121,6 +121,7 @@ func _physics_process(delta):
 					newshot.weapontype = "missile"
 					newshot.accuracy = 30
 					newshot.speedmult = 1000
+					target.missiles_tracking = target.missiles_tracking + 1
 					
 					reload = 2
 				elif type == "mmech":

@@ -1,7 +1,7 @@
 extends ColorPickerButton
 
 func _ready():
-	randomize()
+	#randomize()
 	var var1 = randf() 
 	var var2 = randf()
 	var var3 = randf() 

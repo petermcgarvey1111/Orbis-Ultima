@@ -1,5 +1,5 @@
 extends Node2D
 
 
-var sizex = 115
+var sizex = 100.0
 var texturename = "res://Components/raven.png"

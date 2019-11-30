@@ -26,12 +26,14 @@ var turn_history = [0,0,0,0,0,0,0,0]
 var turn_history2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 var timer2 = 0
 var protocol = "none"
-
+var ship_class = "escort"
 var escort_target = "none"
 var escort_index = 0
-
+var player_order = false
 
 func _ready():
+	ship_class = ship.ship["configuration"]["ai"]["ship_class"]
+	
 	target_angle = ship.rotation
 	left2.add_exception(get_node(".."))
 	right2.add_exception(get_node(".."))
@@ -53,32 +55,32 @@ func _physics_process(delta):
 	
 	if battle.battle_paused == false and ship.towee[0] == ship:
 		if ship.control == "AI" :
-			#print(think_time)
-			if think_time < 0.2:
-				var dodge_response = avoid_obstacles()
 			
-				if dodge_response == "none":
-					
+			#if think_time < 0.2:
+			var dodge_response = avoid_obstacles()
+		
+			if dodge_response == "none":
 				
-					var anglediff = angle_difference(ship.rotation, target_angle)
-					#print(anglediff)
-					#print(target_angle)
-					if anglediff > 0:
-						ai_turn = "right"
-						#print(str(timer2) + "right")
-					elif anglediff < 0:
-						ai_turn = "left"
-						#print(str(timer2) + "left")
-					else:
-						#ship.rotation = ship.rotation + anglediff
-						ai_turn = "center"
-						#print(str(timer2) + "center")
-				
+			
+				var anglediff = angle_difference(ship.rotation, target_angle)
+				#print(anglediff)
+				#print(target_angle)
+				if anglediff > 0:
+					ai_turn = "right"
+					#print(str(timer2) + "right")
+				elif anglediff < 0:
+					ai_turn = "left"
+					#print(str(timer2) + "left")
 				else:
-					ai_turn = dodge_response
-				
-				turn_history.remove(0)
-				turn_history2.remove(0)
+					#ship.rotation = ship.rotation + anglediff
+					ai_turn = "center"
+					#print(str(timer2) + "center")
+			
+			else:
+				ai_turn = dodge_response
+			
+			turn_history.remove(0)
+			turn_history2.remove(0)
 			
 			if abs(angle_difference(ship.rotation, target_angle)) < ship.turn_rate:
 				ai_turn = "center"
@@ -135,13 +137,26 @@ func _physics_process(delta):
 						
 						
 						if ship.mission == "none":
-							#ship.target = pick_new_target()
-							ship.mission = "combat_travel"
-							travel_target = Vector2(cos(ship.rotation), sin(ship.rotation)) * 30000 + ship.position
+							if ship_class == "escort":
+								ship.mission = "combat_travel"
+								travel_target = Vector2(cos(ship.rotation), sin(ship.rotation)) * 30000 + ship.position
+							elif ship_class == "transport" and battle.location["type"] == "Planet":
+								ship.mission = "unload"
+							elif ship_class == "transport" and battle.location["type"] == "Moon":
+								ship.mission = "load"
+							elif ship_class == "assault" and battle.location["type"] == "Planet":
+								ship.mission = "unload"
+							elif ship_class == "assault" and battle.location["type"] == "Moon":
+								ship.mission = "load"
 							
 							
 						
 						elif ship.mission == "nonmobile":
+							for i in battle.shipnodes:
+								if i.faction != ship.faction and i.status == "alive":
+									if abs(ship.position.distance_to(i.position)) < 20000:
+										ship.target = i
+										check_missile_target()
 							if abs(ship.position.x) > 50000 or abs(ship.position.y) > 50000:
 								ship.status = "stranded"
 								
@@ -165,28 +180,29 @@ func _physics_process(delta):
 						
 						elif ship.mission == "combat_travel":
 							travel_protocol()
-							
-							var current_target_priority = 3
-							for i in battle.shipnodes:
-								if i.faction != ship.faction and i.status == "alive":
-									if calculate_target_priority(i) <= current_target_priority:
-										ship.target = i
-										ship.mission = "combat"
+							if player_order == false:
+								var current_target_priority = 50
+								for i in battle.shipnodes:
+									if i.faction != ship.faction and i.status == "alive":
+										if calculate_target_priority(i) <= current_target_priority:
+											
+											ship.target = i
+											ship.mission = "combat"
 										
 							
 						elif ship.mission == "combat_escort":
 							travel_target = escort_target.position + escort_target.velocity * 0.3
 							travel_target = travel_target + escort_index * Vector2(sin(escort_target.rotation) , -cos(escort_target.rotation) ) * (400)
 							escort_protocol()
+							if player_order == false:
+								var current_target_priority = 3
+								for i in battle.shipnodes:
+									
+									if i.faction != ship.faction and i.status == "alive":
+										if calculate_target_priority(i) <= current_target_priority:
+											ship.target = i
+											ship.mission = "combat"
 							
-							var current_target_priority = 3
-							for i in battle.shipnodes:
-								
-								if i.faction != ship.faction and i.status == "alive":
-									if calculate_target_priority(i) <= current_target_priority:
-										ship.target = i
-										ship.mission = "combat"
-						
 						
 						elif ship.mission == "unload":
 							
@@ -237,12 +253,13 @@ func _physics_process(delta):
 								return
 							
 							#print("cancelling target")
-							var current_target_priority = calculate_target_priority(ship.target) / 1.01
-							for i in battle.shipnodes:
-								#print(calculate_target_priority(i))
-								if i.faction != ship.faction and i.status == "alive":
-									if calculate_target_priority(i) <= current_target_priority:
-										ship.target = i
+							if player_order == false:
+								var current_target_priority = calculate_target_priority(ship.target) / 1.01
+								for i in battle.shipnodes:
+									#print(calculate_target_priority(i))
+									if i.faction != ship.faction and i.status == "alive":
+										if calculate_target_priority(i) <= current_target_priority:
+											ship.target = i
 										
 										
 							if ship.target == ship:
@@ -284,10 +301,10 @@ func _physics_process(delta):
 								if abs(ship.get_angle_to(ship.target.position)) < 30 * PI/180:
 #									if ship.position.distance_to(ship.target.position) > ship.effective_range *4:
 #										ship.target_power_ratio = pow(ship.position.distance_to(ship.target.position) , 0.5) / 100
-									if ship.position.distance_to(ship.target.position) > ship.effective_range and ship.target_power_ratio < 0.85 and ship.position.distance_to(ship.target.position)/(ship.speed - ship.target.speed + 0.00000001) < 5:
-										ship.target_power_ratio = ship.target_power_ratio + 0.05
-									elif ship.position.distance_to(ship.target.position) < ship.effective_range / 2 and ship.target_power_ratio > 0.15:
-										ship.target_power_ratio = ship.target_power_ratio - 0.05
+									if ship.position.distance_to(ship.target.position) > ship.effective_range and ship.target_power_ratio < 0.9 and ship.position.distance_to(ship.target.position)/(ship.speed - ship.target.speed + 0.00000001) < 5:
+										ship.target_power_ratio = min(ship.target_power_ratio + 0.5, 0.9)
+									elif ship.position.distance_to(ship.target.position) < ship.effective_range / 2 and ship.target_power_ratio > 0.1:
+										ship.target_power_ratio = max(ship.target_power_ratio - 0.5, 0.1)
 										
 									check_missile_target()
 								else: 
@@ -302,7 +319,7 @@ func _physics_process(delta):
 								
 									
 							elif protocol == "travel":
-								ship.target_power_ratio = 0.5
+								ship.target_power_ratio = 0.6
 							
 							if ship.target_power_ratio > 0.9:
 								ship.target_power_ratio = 0.9
@@ -594,14 +611,28 @@ func calculate_target_priority(possible_target):
 		priority = 10000000000
 	elif possible_target.detected_by.has(ship.faction) == false:
 		priority = 10000000000
-	
+		
 	elif ship.position.distance_to(possible_target.position) > ship.effective_range:
 		priority = priority + (ship.position.distance_to(possible_target.position) - ship.effective_range)/(ship.speed + 1)
+	
+	
 		
+	if possible_target.missiles_tracking > 0:
+		
+		priority = priority / ((possible_target.hulls - possible_target.missiles_tracking * 2.01) / possible_target.hulls)
+		
+		if priority < 0:
+			priority = 10000000000
+			return priority
+			
 		
 	return priority
 	
 func check_missile_target():
+	
+	if ship.position.distance_to(ship.target.position) < 20000 and (ship.target.hulls - ship.target.missiles_tracking * 2) > 0:
+		ship.fire_missile(ship.target)
+
 	if ship.get_angle_to(ship.target.position) < PI/180 * 30:
 		if ship.position.distance_to(ship.target.position) < 4000:
 			if ship.position.distance_to(ship.target.position) > 500:

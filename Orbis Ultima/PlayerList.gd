@@ -8,14 +8,17 @@ func _process(delta):
 	if started == 1:
 		numplayers = gamestate.factions.size()
 		menus = get_child_count()
-		
+		#print(numplayers)
 		
 		if numplayers > menus:
-			add_player_board()
+			while numplayers > menus:
+				add_player_board()
 		
 		var menus2 = self.get_children()
 		var x = 0
+		
 		if menus > 0:
+
 			for i in gamestate.factions.values():
 				menus2[x].get_node("playername").text = i["name"] +":"
 				menus2[x].get_node("playername").modulate = Color(i["char_color"])

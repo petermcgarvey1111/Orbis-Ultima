@@ -27,8 +27,7 @@ func _process(delta):
 		$glaser.show()
 	elif component == "hook":
 		rect_position = position + Vector2(-5, 0)
-	elif component == "missile":
-		rect_rotation = position.y + 62.5
+	
 		
 	
 		

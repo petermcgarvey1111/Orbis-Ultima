@@ -58,11 +58,17 @@ var target_power_ratio = 0.5
 onready var delta2 = battle.delta2
 var detected_by = []
 var effective_range = 0
+var missiles_tracking = 0
+onready var time_mod = battle.time_mod
 
 
 
 
 func _ready():
+	var width = battle.Main.get_node("designdata").blueprints[ship["configuration"]["blueprint"]]["width"]
+	$Area2D.scale = Vector2(width/100, width/100)
+	$Clickable.scale = Vector2(width/100, width/100)
+	
 	var mapobj = load("res://map_icon.tscn").instance()
 	mapobj.ship = self
 	mapobj.faction = faction
@@ -133,6 +139,8 @@ func _ready():
 				componentnodes[ind].get_node("Sprite").texture = load("res://Components/orbital1.png")
 			elif i[0] == "orbital3":
 				componentnodes[ind].get_node("Sprite").texture = load("res://Components/orbital3.png")
+			elif i[0] == "radar":
+				componentnodes[ind].get_node("Sprite").texture = load("res://Components/radar.png")
 			
 			elif i[0] == "bombs":
 				if i[2] == 0:
@@ -227,6 +235,9 @@ func check_threat():
 			effective_range_array.append(designdata.firetable["glaser"][5])
 		elif i[0] == "rlaser" and i[3] == "ready":
 			effective_range_array.append(designdata.firetable["rlaser"][5])
+			threatstatus = true	
+		elif i[0] == "missile" and i[3] == "ready" and i[2] > 0:
+			effective_range_array.append(designdata.firetable["missile"][5])
 			threatstatus = true		
 	
 	if threatstatus == false:
@@ -254,7 +265,7 @@ func deccelerate():
 	
 func _physics_process(delta):
 	
-	delta = delta2
+	delta = delta2 * time_mod
 	if battle.battle_paused == false:
 		
 		if towee[0] == self:
@@ -286,6 +297,7 @@ func _physics_process(delta):
 		if position.distance_to(towtarget.position) < 50 and towtarget != self:
 			connect_hook(towtarget)
 			
+		
 				
 	
 	
@@ -306,12 +318,19 @@ func _physics_process(delta):
 		
 
 func _process(delta):
+	
 	if detected_by.has(gamestate.player_info.name):
 		show()
-	elif battle.factions.has(gamestate.player_info.name):
-		hide()
+	elif battle.battle_fleets.has(gamestate.player_info.name):
+		if battle.battle_fleets[gamestate.player_info.name] == "alive":
+			hide()
+		else:
+			show()
 	else:
 		show()
+		
+		
+	
 
 	
 func short_angle_dist(from, to):
@@ -356,6 +375,8 @@ func fire_missile(target):
 		if i.data[0] == "missile" and i.data[3] == "ready" and i.data[2] == 1:
 			battle.assign_target( shipid, i.componentid, target.shipid)
 			battle.fire_weapon( shipid, i.componentid, "missile")
+			target.missiles_tracking = target.missiles_tracking + 1
+			check_threat()
 			return
 		
 sync func burn(accuracy):

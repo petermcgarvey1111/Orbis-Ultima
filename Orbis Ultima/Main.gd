@@ -1,6 +1,6 @@
 extends Node2D
 
-
+#Main
 #Constants
 var center = Vector2(1000,500)
 #Gagamestate.player_info.name States
@@ -40,13 +40,14 @@ onready var fleet_asset = preload("res://Fleet2.tscn")
 func _ready():
 	set_process_input(true)
 	emit_signal("unselect")
-	randomize()
+	#randomize()
 	for i in get_node("designdata").standard_configs:
 		
 		gamestate.factions[gamestate.player_info.name]["configurations"][i["name"]] = i
 		
 	
 	if (get_tree().is_network_server()):
+		randomize()
 		var players = gamestate.startingplayers
 		for i in range(planets):
 			generate_planet()
@@ -77,7 +78,13 @@ func _ready():
 			generate_planet_actual("Six", 5, Color(1,1,1,1).to_html())
 		for i in range(moons):
 			_on_gen_moon_pressed()
-	
+			
+		for i in range(5):
+			var spaceid = randi() % gamestate.spaces.size()
+			generate_storm(spaceid)
+			
+		
+		generate_rangetable()
 	
 	# Connect event handler to the player_list_changed signal
 	network.connect("player_list_changed", self, "_on_player_list_changed")
@@ -196,15 +203,22 @@ func pause_game(message):
 		i.get_node("selectable").hide()
 	if paused == 1:
 		gamestate.factions[gamestate.player_info.name]["campaign_paused"] = false
+		if get_tree().is_network_server() and sequence == "orbits":
+			for j in get_node("AI").get_children():
+				j.run_ai()
+				
+		
 		broadcast_self()
 		rpc("check_players_ready")
 		
 
 sync func check_players_ready():
 	
+	
 	var moveforward = true
-	for i in gamestate.factions.values():
-		if i["campaign_paused"] == true:
+	for l in network.players.values():
+		var i = l["name"]
+		if gamestate.factions[i]["campaign_paused"] == true:
 			moveforward = false
 	
 	if moveforward == true:
@@ -223,6 +237,7 @@ sync func check_players_ready():
 
 
 func resolve_turn():
+	generate_rangetable()
 	
 	for i in gamestate.spaces:
 		i["sides"] =[]
@@ -258,6 +273,7 @@ func resolve_turn():
 	elif sequence == "return":
 		for l in gamestate.factions.values():
 			for j in l["ships"]:
+				#print(j["launched"])
 				if j["launched"] == "returning" :
 					j["location"] = j["return"]
 					unload_passengers(j)
@@ -280,8 +296,8 @@ func resolve_turn():
 			
 	elif sequence == "orbits":
 		for i in gamestate.factions.values():
-			i["mass"] = i["mass"] + 18
-		
+			#i["mass"] = i["mass"] + 18
+			pass
 			
 			
 	
@@ -424,6 +440,7 @@ func endoforders():
 			
 
 func _process(delta):
+	
 	if paused == 0:
 		if sequence == "orbits":
 			mytimer = mytimer + 1
@@ -472,6 +489,7 @@ func synchronize(id):
 	
 	rpc_id(id,"pass_info",mytimer, gamestate.startingmass, sequence)			
 	rpc_id(id, "broadcast_self")	
+	rpc("generate_rangetable")
 	
 func synchronize_all():
 	
@@ -485,64 +503,147 @@ func synchronize_all():
 			rpc("generate_planet_actual",space["name"], space["spaceid"] , space["color"])
 		elif space["type"] == "Moon":
 			rpc("generate_moon_actual",space["name"], space["spaceid"], space["mass"])
+		elif space["type"] == "Storm":
+			rpc("generate_storm", space["spaceid"])
 	
+	
+	for i in spaces:
+		i.update_planet_info()
+	
+	
+	rpc("generate_rangetable")
+	for x in get_node("AI").get_children():
+		x.free()
+	
+	for q in gamestate.factions.values():
+		if q["ai"] == true:
+			get_node("AI").rpc("init_ai", q["name"])
+			print(q["name"])
+	
+	
+sync func generate_rangetable():
+	var rangetable = []
+	
+	
+	
+	for i in spaces:
+		rangetable.append([])
+		gamestate.spaces[i.spaceid]["neighbors"] = []
+	var ind = 0
+	for i in spaces:
+		for p in spaces:
+			rangetable[ind].append(99)
+		ind += 1
+		for j in spaces:
+			if i.spaceid == j.spaceid:
+				pass
+			elif i.radius == j.radius or i.radius == j.radius - 100:
+					var angle1 = (center - i.position).normalized()
+					var angle2 = (center - j.position).normalized()
+					var anglebetween = acos(angle1.dot(angle2))
+					if abs(anglebetween)  < j.arc + 0.02:
+						gamestate.spaces[i.spaceid]["neighbors"].append(j["spaceid"])
+						
+			elif i.radius == j.radius + 100:
+					var angle1 = (center - i.position).normalized()
+					var angle2 = (center - j.position).normalized()
+					var anglebetween = acos(angle1.dot(angle2))
+					if abs(anglebetween)  < i.arc + 0.02:
+						gamestate.spaces[i.spaceid]["neighbors"].append(j["spaceid"])
 
 
+	for i in gamestate.spaces: # Go through spaces
+		var r_spaces = [] # remaining spaces to check distance
+		var temp = [i["spaceid"]] # spaces in range 
+		var intermediates = []
+		var index = 1 # current distance
+		for j in gamestate.spaces:
+			if gamestate.spaces[j.spaceid]["type"] != "Storm":
+				r_spaces.append(j["spaceid"])
+#			else:
+#				r_spaces.append(j["spaceid"])
+		
+		r_spaces.erase(i["spaceid"]) # Remove current space from spaces to check
+		rangetable[i["spaceid"]][i["spaceid"]] = 0 # Set that distance to 0
+		while r_spaces.size() > 0: # While I still haven't checked everything
+			for k in gamestate.spaces: 
+				if r_spaces.has(k["spaceid"]): # not processed yet
+					for l in temp: # Check to see if it is next to something I've already found
+						if gamestate.spaces[l]["neighbors"].has(k["spaceid"]): # and gamestate.spaces[l]["type"] != "Storm":
+							intermediates.append(k["spaceid"])
+							r_spaces.erase(k["spaceid"])
+							rangetable[i["spaceid"]][k["spaceid"]]  = index
+							break
+			temp = intermediates.duplicate(true)
+			intermediates = []
+			index = index + 1
+		
+		gamestate.spaces[i["spaceid"]]["rangetable"] = rangetable[i["spaceid"]]	
+		#print(rangetable[i["spaceid"]]	)
+	
 
 
 				
 func get_destinations_in_dist(spaceidd, dist):
-	var destinations = [spaceidd]
-	var toremove = []
-	var intemediates2 = []
-	var intemediates = [spaceidd]
-	var spacestotry = spaces.duplicate()
-	for i in dist:
+	var destinations = []
+	var index = 0
+	for i in gamestate.spaces[spaceidd.spaceid]["rangetable"]:
+		if i <= dist:
+			destinations.append(spaces[index])
+		index += 1
 		
-		for spaceid in intemediates:
-			for space in spacestotry:
-				
-				if spaceid == space:
-					intemediates2.append(space)
-					toremove.append(space)
-					
-					
-				elif space.radius == spaceid.radius or space.radius == spaceid.radius - 100:
-					var angle1 = (center - space.position).normalized()
-					var angle2 = (center - spaceid.position).normalized()
-					var anglebetween = acos(angle1.dot(angle2))
-					if abs(anglebetween)  < spaceid.arc + 0.02:
-					
-						
-						intemediates2.append(space)
-						toremove.append(space)
-					
-				elif space.radius == spaceid.radius + 100:
-					var angle1 = (center - space.position).normalized()
-					var angle2 = (center - spaceid.position).normalized()
-					var anglebetween = acos(angle1.dot(angle2))
-					
-					
-					if abs(anglebetween)  < space.arc + 0.02:
-						
-						intemediates2.append(space)
-						toremove.append(space)
-				else:
-					pass
-			for k in toremove:
-				spacestotry.erase(k)
-			toremove = []
-			
-			toremove.append(spaceid)
-		for k in toremove:
-				intemediates.erase(k)
-				toremove = []
-		intemediates = intemediates2
-		destinations = intemediates + destinations
-		for i in destinations:
-			pass
-		intemediates2 = []	
 	return [destinations]
+#	var destinations = [spaceidd]
+#	var toremove = []
+#	var intemediates2 = []
+#	var intemediates = [spaceidd]
+#	var spacestotry = spaces.duplicate()
+#	for i in dist:
+#
+#		for spaceid in intemediates:
+#			for space in spacestotry:
+#
+#				if spaceid == space:
+#					intemediates2.append(space)
+#					toremove.append(space)
+#
+#
+#				elif space.radius == spaceid.radius or space.radius == spaceid.radius - 100:
+#					var angle1 = (center - space.position).normalized()
+#					var angle2 = (center - spaceid.position).normalized()
+#					var anglebetween = acos(angle1.dot(angle2))
+#					if abs(anglebetween)  < spaceid.arc + 0.02:
+#
+#
+#						intemediates2.append(space)
+#						toremove.append(space)
+#
+#				elif space.radius == spaceid.radius + 100:
+#					var angle1 = (center - space.position).normalized()
+#					var angle2 = (center - spaceid.position).normalized()
+#					var anglebetween = acos(angle1.dot(angle2))
+#
+#
+#					if abs(anglebetween)  < space.arc + 0.02:
+#
+#						intemediates2.append(space)
+#						toremove.append(space)
+#				else:
+#					pass
+#			for k in toremove:
+#				spacestotry.erase(k)
+#			toremove = []
+#
+#			toremove.append(spaceid)
+#		for k in toremove:
+#				intemediates.erase(k)
+#				toremove = []
+#		intemediates = intemediates2
+#		destinations = intemediates + destinations
+#		for i in destinations:
+#			pass
+#		intemediates2 = []	
+#	return [destinations]
 		
 func getleastrange(fleet):
 	if fleet.size() > 0:
@@ -639,7 +740,16 @@ func _on_gen_moon_pressed():
 		else:
 			_on_gen_moon_pressed()
 		
-		
+sync func generate_storm(spaceid):
+	
+	if gamestate.spaces[spaceid]["type"] == "empty":
+		gamestate.spaces[spaceid]["type"] = "Storm"
+		spaces[spaceid].type = "Storm"
+		gamestate.spaces[spaceid]["nodeid"].get_node("Sprite").texture = load("res://Bodies/storm.png")
+		gamestate.spaces[spaceid]["nodeid"].get_node("Sprite").show()
+	else:
+		spaceid = randi() % gamestate.spaces.size()
+		generate_storm(spaceid)
 		
 
 func _on_Main_unselect():
@@ -679,9 +789,11 @@ func unload_passengers(ship):
 				mmechs = mmechs + 1
 				i[3] = "ready"
 			elif i[3] == "mass":
+				
 				mass = mass + i[2]
 				i[3] = "ready"
 				i[2] = 0
+			
 		
 		location["army"]["mechs"] = mechs
 		location["army"]["amechs"] = amechs
@@ -705,17 +817,5 @@ func autoresolve_noncombat(space):
 						mass = mass - 10
 						l[2] = 10
 						l[3] = "mass"
-			
-	
-	
-func _input(event):
-	if event.is_action("test"):
-		for i in gamestate.factions.values():
-			for l in i["ships"]:
-				print(l["launched"])
-				print(fleets)
-	
-	
-	
-	
+
 	

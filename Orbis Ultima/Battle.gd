@@ -36,16 +36,45 @@ var queuedorders = []
 var queuedorders2 = []
 var physicstimer =0 
 var delta2 =  0.01665
-
-var lag_delay = 15
-
+var time_mod = 0.5
+var battle_fleets = {}
+var lag_delay = 20.0
+var pingtimer = 2.0
 func _ready():
 	pass
 
+
+func _process(delta):
+	if battle_paused == false:
+		for i in factions:
+			battle_fleets[i] = "status"
+		for j in shipnodes:
+			
+			if j.status == "alive":
+				battle_fleets[j.faction] = "alive"
+	
+		
+remote func ping(timer, lag_delay2):
+	rpc("ping_response", (timer - continuoustimer))
+	lag_delay = lag_delay2
+	
+remote func ping_response(margin):
+	if (get_tree().is_network_server()):
+		#print(margin)
+		if margin < 0:
+			print("desync likely!" + " " + str(margin))
+		elif margin < 30:
+			lag_delay += 1
+		
 	
 func _physics_process(delta):
-#	if Input.is_key_pressed(KEY_X):
-#		print(get_global_mouse_position())
+	delta = delta2 * time_mod
+	
+	pingtimer -= delta
+	if pingtimer < 0:
+		#print("pinging..")
+		pingtimer = 1.0
+		rpc("ping", continuoustimer + lag_delay, lag_delay)
 	
 	
 	continuoustimer = continuoustimer + 1
@@ -85,11 +114,13 @@ func _physics_process(delta):
 				elif i[1] == "combat_travel":
 					shipnodes[i[2]].mission = "combat_travel"
 					shipnodes[i[2]].get_node("navigation").travel_target = i[3]
+					shipnodes[i[2]].get_node("navigation").player_order = true
 					
 				elif i[1] == "combat_escort":
 					shipnodes[i[2]].mission = "combat_escort"
 					shipnodes[i[2]].get_node("navigation").escort_target = shipnodes[i[3]]
 					shipnodes[i[2]].get_node("navigation").escort_index = i[4]
+					shipnodes[i[2]].get_node("navigation").player_order = true
 				
 				elif i[1] == "load":
 					shipnodes[i[2]].mission = "load"
@@ -106,9 +137,17 @@ func _physics_process(delta):
 					
 				elif i[1] == "combat":
 					shipnodes[i[2]].mission = "combat"
+					shipnodes[i[2]].get_node("navigation").player_order = false
 					
 				elif i[1] == "stand":
 					shipnodes[i[2]].mission = "stand"
+					
+					
+				elif i[1] == "assign_target":
+					shipnodes[i[2]].mission = "combat"
+					shipnodes[i[2]].get_node("navigation").player_order = true
+					shipnodes[i[2]].target = shipnodes[i[3]]
+					print("assigned target")
 					
 					
 					
@@ -213,7 +252,11 @@ sync func initialize(spaceid):
 	battle_paused = true
 	
 	for i in factions:
-		gamestate.factions[i]["battle_paused"] = true
+		#print(i)
+		if gamestate.factions[i]["ai"] == false:
+			gamestate.factions[i]["battle_paused"] = true
+		battle_fleets[i] = "alive"
+		
 	$CanvasLayer/Paused.update()				
 	
 	
@@ -228,17 +271,55 @@ sync func initialize(spaceid):
 		fac_angle = fac_angle + 2*PI / (numfactions)
 		var fac_start = Vector2(cos(fac_angle), sin(fac_angle))
 		var fac_angle2 = Vector2(fac_start.y, -fac_start.x)
+		var escorts = [1,0,0]
+		var transports = [1,0,0]
+		var assault = [1,0,0]
 		if numfactions == 1:
-			fac_start = fac_start * 4000
+			fac_start = fac_start * 3000
+		elif gamestate.spaces[location.spaceid]["faction"] == factions[l]:
+			fac_start = fac_start * 8000
 		else:
-			fac_start = fac_start * 15000
+			fac_start = fac_start * 12000
 		nextposition = fac_start
 		for i in ships2:
 			if i["faction"] == factions[l]:
 				var ship = ship_asset.instance()
 				if Main.getrange(i) > 0:
 					var width = blueprints[i["configuration"]["blueprint"]]["width"]
-					nextposition = nextposition +  (width + width2)/2 * 5 * fac_angle2
+					if i["configuration"]["ai"]["ship_class"] == "escort":
+						if escorts[-1] == 0:
+							nextposition = fac_start + escorts[escorts[0]] * fac_angle2 * escorts[0]
+							escorts[-1] = width * 1 + 20
+							escorts[1] = width * 1 + 20
+						else:
+							escorts[escorts[0]] += width * 1 + 20 
+							nextposition = fac_start + escorts[escorts[0]] * fac_angle2 * escorts[0]
+							escorts[escorts[0]] += width * 1 + 20
+							escorts[0] *= -1
+						
+					elif i["configuration"]["ai"]["ship_class"] == "assault":
+						if assault[-1] == 0:
+							nextposition = fac_start * 1.05 + assault[assault[0]] * fac_angle2 * assault[0]
+							assault[-1] = width * 2 + 5 
+							assault[1] = width * 2 + 5 
+						else:
+							assault[assault[0]] += width * 2 + 5 
+							nextposition = fac_start * 1.05 + assault[assault[0]] * fac_angle2 * assault[0]
+							assault[assault[0]] += width * 2  + 5
+							assault[0] *= -1
+						
+					elif i["configuration"]["ai"]["ship_class"] == "transport":
+						if transports[-1] == 0:
+							nextposition = fac_start * 1.1 + transports[transports[0]] * fac_angle2 * transports[0]
+							transports[-1] = width * 2 + 5 
+							transports[1] = width * 2 + 5 
+						else:
+							transports[transports[0]] += width * 2 + 5 
+							nextposition = fac_start * 1.1 + transports[transports[0]] * fac_angle2 * transports[0]
+							transports[transports[0]] += width * 2+ 5
+							transports[0] *= -1
+						
+						
 					width2 = blueprints[i["configuration"]["blueprint"]]["width"]
 					ship.startangle = nextposition
 					ship.position = nextposition
@@ -369,6 +450,8 @@ func _on_End_pressed():
 		rpc("end_battle")
 		
 sync func end_battle():
+	
+	battle_fleets = {}
 	queuedorders = []
 	queuedorders2 = []
 	$background/background.hide()
@@ -385,11 +468,23 @@ sync func end_battle():
 	for l in $CanvasLayer/scene/map.get_children():
 		l.queue_free()
 	
+	if gamestate.spaces[location.spaceid]["type"] == "Moon":
+		for i in shipnodes:
+			if i.check_mobility() > 0 and mass > 0 and i.mission != "exit":
+				for l in i.componentnodes:
+					if (l.data[0] == "storage" and l.data[3] == "ready") or (l.data[0] == "storage" and l.data[3] == "mass") : 
+							var transfer = min(mass, 10 - l.data[2])
+							mass = mass - transfer
+							l.data[2] += transfer
+							l.data[3] = "mass"
+	
+	
 	for l in shipnodes:
 		if l.towee[0] != l:
 			l.ship["towed"] = [l.towee[0].check_mobility(), l.towee[0].ship["return"]]
 			
 		l.queue_free()
+	shipnodes = []
 	get_tree().call_group("shots", "queue_free")
 	hide()
 	get_node("CanvasLayer/scene").hide()
@@ -515,7 +610,7 @@ sync func assign_tow(towee, tower):
 	
 	
 func _input(event):
-	if event.is_action_pressed("pause"):
+	if event.is_action_pressed("pause") and Main.clickstate == "battle":
 		if battle_paused == false:
 			rpc("pause_toggle_queue", str(gamestate.player_info.name), (battletimer + lag_delay) ,"pause")
 		elif gamestate.factions[gamestate.player_info.name]["battle_paused"] == false:
@@ -559,14 +654,16 @@ func pause_toggle(player):
 
 	
 sync func pause_toggle_queue(player, timer, state):
+	
 	if state == "pause":
 		queuedorders.append([timer, "pause_game" , player])
-		#print(timer - battletimer)
+		print(player + " "  + str(state) + " " + str(timer - battletimer))
 	elif state == "pause2":
 		queuedorders2.append([timer, "pause_game" , player])
+		print(player + " "  + str(state) + " " + str(timer - continuoustimer))
 	else:
 		queuedorders2.append([timer, "unpause_game" , player])
-		#print(timer - continuoustimer)
+		print(player + " "  + str(state) + " " + str(timer - continuoustimer))
 	
 sync func queue_destroy_comp(timer, shipid, componentid):
 	queuedorders.append([timer, "destroy_comp", shipid, componentid])
@@ -597,7 +694,10 @@ sync func queue_combat(timer, ship):
 	
 sync func queue_stand(timer, ship):
 	queuedorders.append([timer, "stand", ship])
-
+	
+sync func queue_assign_target(timer, ship, target):
+	queuedorders.append([timer, "assign_target", ship.shipid, target.shipid])
+	
 
 
 

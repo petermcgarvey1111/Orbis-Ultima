@@ -2,6 +2,7 @@ extends Node
 var rings = 4
 var moons = 0
 var planets = 0
+var storms = 0
 var startingplayers = 1
 var startingmass = 78
 var player_info = {
@@ -13,23 +14,27 @@ var player_info = {
 
 var spacessaved = []
 var spaces = []
+var realspaces = []
+var Moons = []
+var Planets = []
 var factions = {}
 var orderedfactions = []
 var current_seed = 10
 
 
-func generate_me():
+func generate_faction(name, color, ai):
 	var newplayer = {}
-	newplayer["name"] = gamestate.player_info["name"]
-	newplayer["char_color"] = gamestate.player_info["char_color"]
+	newplayer["name"] = name
+	newplayer["char_color"] = color
 	newplayer["mass"] = -999
 	newplayer["ships"] = []
 	newplayer["blueprints"] = {}
 	newplayer["configurations"] = {}
 	newplayer["home"] = 1000
-	newplayer["battle_paused"] = true 
-	newplayer["campaign_paused"] = true
-	var string = str(gamestate.player_info.name)
+	newplayer["battle_paused"] = !ai 
+	newplayer["campaign_paused"] = !ai
+	newplayer["ai"] = ai
+	var string = str(name)
 	factions[string] = (newplayer)
 	orderedfactions.append(newplayer["name"])
 	
